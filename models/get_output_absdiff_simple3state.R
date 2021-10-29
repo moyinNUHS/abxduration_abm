@@ -15,7 +15,7 @@ get_output_summarystats_simple <- function(n.bed, max.los, n.day,
   message(paste0('running ', dur.type, ' duration for ', iterations, ' iterations...'))
   
   # empty matrix to store output - each row is a day, each col is a iteration 
-  iter_totalR = matrix(NA, nrow = n.day, ncol = iterations)
+  iter_totalR = iter_totalRtreated = matrix(NA, nrow = n.day, ncol = iterations)
   iter_newR = c()
   
   for(iter in 1:iterations){ # for each iteration 
@@ -27,6 +27,7 @@ get_output_summarystats_simple <- function(n.bed, max.los, n.day,
                                      meanDur = meanDur, timestep=timestep)
     patient.matrix = matrixes[[1]]
     abx.matrix = matrixes[[2]]
+    abxb4.matrix = matrixes[[3]]
     los.array = summary_los(patient.matrix = patient.matrix)
     
     
@@ -39,15 +40,14 @@ get_output_summarystats_simple <- function(n.bed, max.los, n.day,
                                      abx.matrix = abx.matrix, colo.matrix = colo.matrix, 
                                      bif = bif, pi_ssr = pi_ssr, repop.s = repop.s, mu = mu, 
                                      abx.s = abx.s, abx.r = abx.r, timestep = timestep)
-    
-    # summary of the outputs
-    ### R carriers amongst those treated with antibiotics
-    
   
-    
     ### Rs per day 
     total_R_perday = matrix(rowSums(colo.matrix_filled_iter == "R"), ncol = timestep, byrow=T)
     iter_totalR[, iter]= rowMeans(total_R_perday)
+    
+    ### R carriers amongst those treated with antibiotics
+    total_Rtreated_perday = matrix(rowSums(colo.matrix_filled_iter == "R" & abxb4.matrix == 1), ncol = timestep, byrow=T)
+    iter_totalRtreated[, iter]= rowMeans(total_Rtreated_perday)
     
     ### New R at discharge when not admitted as R 
     patient.matrix.exlude.burnin = patient.matrix[((burn_in + 1) : n.day), ]   # patient matrix after the first `burn_in` days 
@@ -72,9 +72,12 @@ get_output_summarystats_simple <- function(n.bed, max.los, n.day,
   total_R_periter_perday = rowSums(iter_totalR[(burn_in + 1) : nrow(iter_totalR), , drop = FALSE]) / iterations / n.bed
   totalR = mean(total_R_periter_perday) # mean of the days 
   
+  total_Rtreated_periter_perday = rowSums(iter_totalRtreated[(burn_in + 1) : nrow(iter_totalRtreated), , drop = FALSE]) / iterations / n.bed
+  totalRtreated = mean(total_Rtreated_periter_perday) # mean of the days 
+  
   newR = mean(iter_newR) # mean per iteration
   
-  return(c(totalR = totalR, newR = newR))
+  return(c(totalR = totalR, totalRtreated = totalRtreated, newR = newR))
   
 }
 
@@ -82,12 +85,12 @@ get_output_summarystats_simple <- function(n.bed, max.los, n.day,
 run_absdiff_simple3state <- function(n.bed, max.los, 
                                      prop_R, prop_S, 
                                      bif, pi_ssr, repop.s, mu, abx.s, abx.r,
-                                     p.infect, cum.r.1, p.r.day1, p.r.after, short_dur, long_dur){
+                                     p.infect, cum.r.1, p.r.day1, p.r.after, short_dur, long_dur,
+                                     iterations = 100){
   
   message('simple 3 state model initiating...')
   
-  timestep = 1
-  iterations = 100 # from AA tests - switch iterations to 1 when doing AA test
+  timestep = 1# from AA tests - switch iterations to 1 when doing AA test
   n.day = 300
   burn_in = 150    # from equilibrium graphs 
   
@@ -123,8 +126,8 @@ run_absdiff_simple3state <- function(n.bed, max.los,
 }
 
 # names of the output columns
-res.names = c('totalR_long', 'newR_long', 
-              'totalR_short', 'newR_short', 
-              'totalR_diff', 'newR_diff')
+res.names = c('totalR_long', 'totalRtreated_long','newR_long', 
+              'totalR_short', 'totalRtreated_short', 'newR_short', 
+              'totalR_diff', 'totalRtreated_diff', 'newR_diff')
 
 

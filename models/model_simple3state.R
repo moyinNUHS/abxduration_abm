@@ -1,4 +1,4 @@
-source('~/Documents/nBox/git_projects/indiv_abxduration_incmetaanalysis/indiv_abxduration/models/msm_util_rtnorm.R')
+source('models/msm_util_rtnorm.R')
 
 ## Simple 3 state model 
 # carriage of only R and S bacteria 

@@ -1,6 +1,6 @@
 # screen for duplicates 
 
-setwd('~/Documents/nBox/git_projects/indiv_abxduration_incmetaanalysis/indiv_abxduration/metaanalysis/')
+setwd('~/Documents/nBox/git_projects/abxduration_abm/metaanalysis/')
 
 get.deduplicated <- function(purpose){
   
@@ -17,7 +17,7 @@ get.deduplicated <- function(purpose){
     
     if (!'PUI' %in% colnames(combine)) {combine$PUI = NA}
     
-    combine[, c('PMID', 'PUI', 'Title', 'Publication.Year')]
+    combine[, c('PMID', 'PUI', 'Title')]
   })
   
   raw = do.call('rbind', raw.database.list)
@@ -38,11 +38,10 @@ get.deduplicated <- function(purpose){
 }
 
 ## for duration and colonising bacteria metaanalysis 2000 - 2021 
-# get.deduplicated(purpose = 'abxdur')
+get.deduplicated(purpose = 'abxdur')
 
 ## 1920 - 1999 
 get.deduplicated(purpose = 'durtrialappraise')
-
 
 
 

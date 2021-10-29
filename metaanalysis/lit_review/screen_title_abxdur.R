@@ -206,31 +206,14 @@ length(notClinical)
 d = d[- unique(c(notRCT, notrequireABX, notAbxdur, notClinical)),]
 d = d[order(d$PMID),]
 nrow(d)
-# keep = unique(c('weeks', 'week', 'days', 'Days', 'Day', 
-#                'rocalcitonin', 'uration', 'course', d$Title)))
-# d = d[-keep,]
 
-done = read.csv('~/Desktop/done.csv')[,c("relevancy", "reason_exclude", "comments", "meandur_short", "meandur_long", "fu_dur", "PMID", "Title")]
-d = d[,c('PMID', 'Title')]
-final = merge(d, done, by = 'PMID', all.x = T)
-final = final[,c("relevancy", "reason_exclude", "comments", "meandur_short", "meandur_long", "fu_dur", "PMID", "Title.x")]
+old = read.csv('~/Desktop/abxdur_litreview131021.csv')
+combine = merge(d, old, by = 'PMID', all.x = T)
+colnames(combine)[which(colnames(combine) == 'Title')] = 'title'
 
-add = data.frame(relevancy = c(1, 1, NA, NA), 
-                 reason_exclude = c('', '', NA, NA), 
-                 comments= c('Surveillance sputum, throat, rectum, axilla, and wounds was assessed at the time of ICU admission, once weekly during the stay, at discharge from the ICU, and, if possible, at 7 days after ICU discharge', 
-                             NA, NA, NA), 
-                 meandur_short = c('', '', NA, NA), 
-                 meandur_long = c('', '', NA, NA), 
-                 fu_dur= c('', '', NA, NA),  
-                 PMID = c(14522530, 11967597, 29153975, 23403680), 
-                 Title.x = c("Effects of selective decontamination of digestive tract on mortality and acquisition of resistant bacteria in intensive care: a randomised controlled trial", 
-                             "Selective decontamination of subglottic area in mechanically ventilated patients with multiple trauma", 
-                             "Optimisation of empirical antimicrobial therapy in patients with haematological malignancies and febrile neutropenia (How Long study): an open-label, randomised, controlled phase 4 trial",
-                             "Tedizolid phosphate vs linezolid for treatment of acute bacterial skin and skin structure infections: the ESTABLISH-1 randomized trial"
-                 ))
+final = combine[,c('relevent', 'dur_trial', 'reason_exclude','Comments', 'short_dur', 'long_dur', 'fu_period', 'PMID', 'title')]
 
-final = rbind(final, add)
 
-write.csv(final, 'lit_review/after_screen_title_withR.csv')
-sum(is.na(final$relevancy))
+write.csv(final, 'lit_review/after_screen_title_withR_abxdur.csv')
+
 

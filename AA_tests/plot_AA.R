@@ -14,7 +14,7 @@ rm(list = ls())
 library(ggplot2)
 
 # set working directory 
-working.directory.main = '~/Documents/nBox/git_projects/indiv_abxduration(inc metaanalysis)/indiv_abxduration/'
+working.directory.main = '~/Documents/nBox/git_projects/abxduration_abm/'
 setwd(working.directory.main)
 
 #=======================#

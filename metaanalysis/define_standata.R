@@ -2,32 +2,35 @@
 # Define trial data for running JAGS models
 # ========================================== #
 
-dat = read.csv('metaanalysis/lit_review/clean_extracteddata.csv')
+dat = read.csv('lit_review/clean_extracteddata.csv')
 
 ## function to write data into list for stan
 select.data <- function(abx_appropriate_for_resistancetype = unique(dat$abx_appropriate_for_resistancetype), 
-                        abx_appropriate_exist = unique(dat$abx_appropriate_exist), 
-                        colonisation_site = unique(dat$colonisation_site), 
-                        setting = unique(dat$setting),
-                        fu_cutoff = 30, #main analysis use 30 days as cut off for follow up time 
-                        bacteria_grp = unique(dat$bacteria_grp)){
+                        #abx_appropriate_exist = unique(dat$abx_appropriate_exist), 
+                        #colonisation_site = unique(dat$colonisation_site), 
+                        #setting = unique(dat$setting),
+                        fu_cutoff = 999, 
+                        bacteria_grp = unique(dat$bacteria_grp),
+                        mean_prior,
+                        mean_sd_prior,
+                        sigma_prior1, 
+                        sigma_prior2){
   
   ##############
   # Select data from main dataset 
   #### select rows for columns with no NA 
-  dat.to.analyse = dat[which(dat$colonisation_site %in% colonisation_site & 
-                               dat$bacteria_grp %in% bacteria_grp & 
-                               dat$setting %in% setting &
-                               dat$abx_appropriate_exist %in% abx_appropriate_exist),]
+  dat.to.analyse = dat[which(dat$bacteria_grp %in% bacteria_grp),]
+                               #dat$colonisation_site %in% colonisation_site & 
+                               #dat$setting %in% setting &
+                               #dat$abx_appropriate_exist %in% abx_appropriate_exist),]
   
   #### select rows based on abx_appropriate_for_resistancetype which includes NA values for dur = 0 
-  dat.to.analyse = dat.to.analyse[- which(dat.to.analyse$abx_appropriate_for_resistancetype != abx_appropriate_for_resistancetype),]
+  remove = which(dat.to.analyse$abx_appropriate_for_resistancetype != abx_appropriate_for_resistancetype)
+  if (length(remove > 0)) { dat.to.analyse = dat.to.analyse[- remove,] }
   # hence only left with rows with NA and value for abx_appropriate_for_resistancetype
   
   #### select rows depending on follow up time 
-  fu.time = NA
-  fu.time[which(dat.to.analyse$time_baseline_endoffu != 'Point prevalence surveys')] = as.numeric(dat.to.analyse$time_baseline_endoffu[which(dat.to.analyse$time_baseline_endoffu != 'Point prevalence surveys')])
-  fu.time[which(dat.to.analyse$time_baseline_endoffu == 'Point prevalence surveys')] = 1
+  fu.time = as.numeric(dat.to.analyse$time_baseline_endoffu)
   dat.to.analyse = dat.to.analyse[which(fu.time <= fu_cutoff),]
   
   #### remove trials with just one duration 
@@ -66,12 +69,14 @@ select.data <- function(abx_appropriate_for_resistancetype = unique(dat$abx_appr
     time_baseline_endoffu = ifelse(dat.to.analyse$time_baseline_endoffu == "Point prevalence surveys", -99, as.integer(dat.to.analyse$time_baseline_endoffu)),
     n_ind_contributedsamples = round(dat.to.analyse$n_ind_contributedsamples), 
     n_ind_outcome = round(dat.to.analyse$n_ind_outcome), 
-    binom_dist = which(dat.to.analyse$outcome_distribution == 'binomial'),
-    pois_dist = which(dat.to.analyse$outcome_distribution == 'poisson'),
     study_id = dat.to.analyse$study_id, 
-    study_N = max(dat.to.analyse$study_id)
+    study_N = max(dat.to.analyse$study_id), 
+    setting = ifelse(dat.to.analyse$setting == 'Inpatient', 1, 0),
+    mean_prior = mean_prior,
+    mean_sd_prior = mean_sd_prior,
+    sigma_prior1 = sigma_prior1, 
+    sigma_prior2 = sigma_prior2
   )
-  
   
   return(list(dat.to.analyse, jags.data))
   

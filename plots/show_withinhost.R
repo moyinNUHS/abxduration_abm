@@ -1,6 +1,6 @@
 ##########################################################################
 #######Effect of antibiotic duration on hospitalised patients ############
-##################### Show withinhost changes    ##########################
+##################### Show withinhost changes    #########################
 ##########################################################################
 
 # clean working environment
@@ -12,13 +12,13 @@ library(ggpubr)
 library(reshape)
 
 # load data 
-load('runs/populationgrowth_2021-05-25_withinhost.Rdata')
+load('runs/populationgrowth_2021-10-26withinhost.Rdata')
 
 # clean data 
-low.s = dat[which(dat$s_growth < 0.5), c('day', 'S_short_perday', 'S_long_perday')]
+low.s = dat[which(dat$s_growth < 0.25), c('day', 'S_short_perday', 'S_long_perday')]
 low.s$growth_type = 'low.s'
 colnames(low.s) = c('day', 'short_perday', 'long_perday', 'growth_type')
-high.s = dat[which(dat$s_growth > 1.5), c('day', 'S_short_perday', 'S_long_perday')]
+high.s = dat[which(dat$s_growth > 0.75), c('day', 'S_short_perday', 'S_long_perday')]
 high.s$growth_type = 'high.s'
 colnames(high.s) = c('day', 'short_perday', 'long_perday', 'growth_type')
 low.r = dat[which(dat$fitness.r < 0.5), c('day', 'R_short_perday', 'R_long_perday')]
@@ -34,7 +34,7 @@ r_thres = mean(c(dat$r_thres_short, dat$r_thres_long))
 
 dat.cut.avgbyday = dat.cat %>%
   group_by(day, growth_type) %>%
-  summarise_at(vars(short_perday, long_perday), mean)
+  dplyr::summarise_at(vars(short_perday, long_perday), mean)
 dat.long = reshape2::melt(dat.cut.avgbyday, id.vars = c('day', 'growth_type'))
 dat.long$dur_type = 'short'
 dat.long$dur_type[grep('long', dat.long$variable)] = 'long'
@@ -49,24 +49,53 @@ dat.long$bact_type[grep('.r', dat.long$growth_type)] = 'R'
 dat.long$abx.dur = unique(dat$short_dur)
 dat.long$abx.dur[which(dat.long$dur_type == 'Long treatment duration')] = unique(dat$long_dur)
 
-dat.long$thres_text = 'Threshold of resistant bacteria population size\nfor the individual to be a resistance carrier'
-dat.long$thres_text[which(dat.long$dur_type == 'Long treatment duration')] = NA
-dat.long$thres_text.x = 22
-dat.long$thres_text.x[which(dat.long$dur_type == 'Long treatment duration')] = NA
-dat.long$thres_text.y = 0.2
-dat.long$thres_text.y[which(dat.long$dur_type == 'Long treatment duration')] = NA
-
 dat.long$growth_type[grep('high', dat.long$growth_type)] = 'high'
 dat.long$growth_type[grep('low', dat.long$growth_type)] = 'low'
 
+
+dat.long$line.labs.x = 27
+dat.long$line.labs = NA
+dat.long$line.labs.y = NA
+
+for (d in c(3, 15)){
+  for (b in c('S', 'R')){
+    for (g in c('high', 'low')){
+      row = which(dat.long$abx.dur == d & dat.long$bact_type == b & dat.long$growth_type == g)
+      dat.long$line.labs.y[row] = tail(dat.long$value[row], 1) + 0.025
+      if (b == 'R' & g == 'low') {dat.long$line.labs.y[row] = tail(dat.long$value[row], 1) - 0.03}
+      if (b == 'R' & g == 'low' & d == 3) {dat.long$line.labs.y[row] = tail(dat.long$value[row], 1) - 0.02}
+      if (b == 'R' & g == 'high' & d ==15) {dat.long$line.labs.y[row] = tail(dat.long$value[row], 1) + 0.09}
+      dat.long$line.labs[row] = paste0(ifelse(g == 'high', 'Fast', 'Slow'), 
+                                       ' ', b, ' growth')
+    }
+  }
+}
+
+dat.long$arrow.right.seg.x = 0
+dat.long$arrow.right.seg.x.end = 15
+dat.long$arrow.right.seg.x.end[which(dat.long$dur_type == 'Short treatment duration')] = 3
+dat.long$arrow.right.seg.y = 0.9
+dat.long$arrow.right.seg.y.end = 0.9
+
+dat.long$arrow.left.seg.x = 3
+dat.long$arrow.left.seg.x.end = 0
+dat.long$arrow.left.seg.y = 0.9
+dat.long$arrow.left.seg.y.end = 0.9
+
+dat.long$arrow.lab = 'Treatment duration'
+dat.long$arrow.lab[which(dat.long$dur_type == 'Short treatment duration')] = 'Treatment\nduration'
+dat.long$arrow.lab.y = 0.92
+dat.long$arrow.lab.y[which(dat.long$dur_type == 'Short treatment duration')] = 0.94
+dat.long$arrow.lab.x = 7.5
+dat.long$arrow.lab.x [which(dat.long$dur_type == 'Short treatment duration')] = 1.5
+
 ggplot(dat.long, aes(x = day, y = value, group = interaction(bact_type, growth_type), color = bact_type, linetype = growth_type)) + 
   geom_rect(data = dat.long[c(1, nrow(dat.long)),], aes(xmin = 0, xmax = abx.dur, ymin = -Inf, ymax = Inf, fill = 'grey', color = NA), alpha = 0.1) +
-  # geom_line(size = 1.5) + 
-  # geom_point(alpha = 0.4) +
-  geom_smooth(size = 1.5, se = F, method = loess) +
-  geom_hline(yintercept = r_thres, linetype = 'dotted', color = 'blue') +
-  geom_text(aes(x = thres_text.x, y = thres_text.y, label = thres_text), color = 'grey40', size = 3.7) +
-  labs(y = 'Proportion of bacteria out of the total gut carrying capacity', x = 'Day since antibiotic started') +
+  geom_line(size = 1.5) + 
+  #geom_point(alpha = 0.4) +
+  #geom_smooth(size = 1.5, se = F, method = loess) +
+  geom_text(aes(x = line.labs.x, y = line.labs.y, label = line.labs, color = bact_type), size = 5) +
+  labs(y = 'Number of bacteria\n(Proportion of max gut carrying capacity)', x = 'Day since antibiotic started') +
   facet_grid(.~dur_type) + 
   scale_y_continuous(limits = c(0, 1)) +
   scale_x_continuous(limits = c(0, 30)) +
@@ -74,22 +103,25 @@ ggplot(dat.long, aes(x = day, y = value, group = interaction(bact_type, growth_t
                      values = c('#D7816A', "#729B79"), 
                      labels = c('Resistant bacteria', 'Susceptible bacteria')) +
   scale_linetype(name = '', labels = c('Fast bacterial growth', 'Slow bacterial growth')) +
+  geom_segment(aes(x = dat.long$arrow.right.seg.x, xend = dat.long$arrow.right.seg.x.end, 
+                   y = dat.long$arrow.right.seg.y, yend = dat.long$arrow.right.seg.y.end),
+               arrow = arrow(unit(4, "cm")),
+               colour = "grey") +
+  geom_segment(aes(x = dat.long$arrow.left.seg.x, xend = dat.long$arrow.left.seg.x.end, 
+                   y = dat.long$arrow.left.seg.y, yend = dat.long$arrow.left.seg.y.end),
+               arrow = arrow(unit(4, "cm")),
+               colour = "grey") +
+  geom_text(aes(x = arrow.lab.x, y = arrow.lab.y, label = arrow.lab), color = 'grey40', size = 4) +
   theme_minimal() +
   scale_fill_manual(values = c('grey20'), name = '', labels = 'Antibiotic treatment period') + 
-  guides(color = guide_legend(override.aes = list(color = c('#D7816A', "#729B79"),
-                                                  fill  = c("white", "white"), 
-                                                  shape = c(15, 15),
-                                                  size = c(5, 5),
-                                                  linetype = 0)), 
-         linetype = guide_legend(override.aes = list(fill  = c("white", "white")))) +
-  theme(legend.position = 'bottom', 
-        strip.text = element_text(size = 15),
+  theme(legend.position = 'none', 
+        strip.text = element_text(size = 15, face='bold'),
         text = element_text(size = 15), 
         legend.text = element_text(size=12), 
         legend.key = element_blank()) 
 
 ggsave('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/final_main/withinhost.png',  
        dpi = 500, 
-       width = 12, height = 8)
+       width = 13, height = 8)
 
 

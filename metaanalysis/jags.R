@@ -1,70 +1,113 @@
 
 ###############################################
-## Model
+## Model 1 with rand
 ###############################################
 
-jags.mod <- function(){
+jags.rand <- function(){
   
   # Likelihood:
-  for (i in binom_dist){
+  for (i in 1:length(study_id)){ # for each arm 
     
     n_ind_outcome[i] ~ dbin(mu[i], n_ind_contributedsamples[i])
     
     logit(mu[i]) <- a[study_id[i]] + # intercept - each trial has an intercept
-      b[study_id[i]] * abx_dur[i]  + # each trial has a slope
-      c[study_id[i]] * time_baseline_endoffu[i]
+      b[study_id[i]] * abx_dur[i] + 
+      c[study_id[i]] * time_baseline_endoffu[i] + 
+      d[study_id[i]] * setting[i] 
     
-    #loglike[i] <- dbin(outcome_incub5[i], mu[i], 1) # For WAIC computation
-    
+    loglike[i] <- dbin(n_ind_outcome[i], mu[i], 1) # For WAIC computation
   }
   
-  for (i in pois_dist){
-    
-    n_ind_outcome[i] ~ dpois(mu[i] * n_ind_contributedsamples[i])
-    
-    logit(mu[i]) <- a[study_id[i]] +   # intercept - each trial has an intercept
-      b[study_id[i]] * abx_dur[i]      # each trial has a slope
-  }
-  
-  for (w in 1:study_N){
+  for (w in 1:study_N){ # for each study 
     
     a[w] ~ dnorm(a0, sigma_a);
     b[w] ~ dnorm(b0, sigma_b);
     c[w] ~ dnorm(c0, sigma_c);
-    
-    # a[w] <- a0 + aprimed[w] * sigma.a
-    # b[w] <- b0 + bprimed[w] * sigma.b
-    # c[w] <- c0 + cprimed[w] * sigma.c
-    # 
-    # aprimed[w] ~ dnorm(0, 5);T(0,);
-    # bprimed[w] ~ dnorm(0, 5);T(0,);
-    # cprimed[w] ~ dnorm(0, 5);T(0,);
+    d[w] ~ dnorm(d0, sigma_d);
     
   }
   
-  # Priors:
-  # a0 ~ dnorm(0.1, 1);T(0,);
-  # sigma.a ~ dunif(0, 5);
-  # b0 ~ dnorm(0.1, 1);
-  # sigma.b ~ dunif(0, 5);
-  # c0 ~ dnorm(0.1, 1);
-  # sigma.c ~ dunif(0, 5);
+  a0 ~ dnorm(mean_prior, mean_sd_prior);
+  b0 ~ dnorm(mean_prior, mean_sd_prior); 
+  c0 ~ dnorm(mean_prior, mean_sd_prior); 
+  d0 ~ dnorm(mean_prior, mean_sd_prior); 
   
-  a0 ~ dnorm(1, 5);T(0,);
-  b0 ~ dnorm(0, 5);
-  c0 ~ dnorm(0, 5);T(0,);
-  
-  sigma_a ~ dunif(0, 2); 
-  sigma_b ~ dunif(0, 2); 
-  sigma_c ~ dunif(0, 2);
-  
+  sigma_a ~ dgamma(sigma_prior1, sigma_prior2); 
+  sigma_b ~ dgamma(sigma_prior1, sigma_prior2); 
+  sigma_c ~ dgamma(sigma_prior1, sigma_prior2); 
+  sigma_d ~ dgamma(sigma_prior1, sigma_prior2);
   
 }
 
-init <- function(){
-  list(a0 = 0.1, b0 = 0.1, c0 = 0.1, 
-       sigma_a = 1, sigma_b = 1, sigma_c = 1)
+init.rand <- function(){
+  list(a0 = 0, b0 = 0,  c0 = 0, d0 = 0, sigma_a = 1, sigma_b = 1, sigma_c = 1, sigma_d = 1)
 }
 
-params <- c("a", "b", "c", "a0", "b0", "sigma_a", "sigma_b")
+params.rand <- c("a", "b", "c", "d", 
+                 "a0", "b0", "c0", "d0", 
+                 "sigma_a", "sigma_b",  "sigma_c", "sigma_d",
+                 "loglike")
+
+###############################################
+## Model 2 no random effect
+###############################################
+
+jags.norand <- function(){
+  
+  # Likelihood:
+  for (i in 1:length(study_id)){ # for each arm 
+    
+    n_ind_outcome[i] ~ dbin(mu[i], n_ind_contributedsamples[i])
+    
+    logit(mu[i]) <- a + # intercept - each trial has an intercept
+      b * abx_dur[i] + 
+      c * time_baseline_endoffu[i]+ 
+      d * setting[i] 
+    
+    loglike[i] <- dbin(n_ind_outcome[i], mu[i], 1) # For WAIC computation
+  }
+  
+  a ~ dnorm(mean_prior, mean_sd_prior);
+  b ~ dnorm(mean_prior, mean_sd_prior);
+  c ~ dnorm(mean_prior, mean_sd_prior);
+  d ~ dnorm(mean_prior, mean_sd_prior);
+  
+}
+
+init.norand <- function(){
+  list(a = 0, b = 0,  c = 0, d= 0)
+}
+
+params.norand <- c("a", "b", "c", "d", "loglike")
+
+
+###############################################
+## Model 3 with rand but no d
+###############################################
+
+jags.norandnod <- function(){
+  
+  # Likelihood:
+  for (i in 1:length(study_id)){ # for each arm 
+    
+    n_ind_outcome[i] ~ dbin(mu[i], n_ind_contributedsamples[i])
+    
+    logit(mu[i]) <- a + # intercept - each trial has an intercept
+      b * abx_dur[i] + 
+      c * time_baseline_endoffu[i]
+      
+      loglike[i] <- dbin(n_ind_outcome[i], mu[i], 1) # For WAIC computation
+  }
+  
+  a ~ dnorm(mean_prior, mean_sd_prior);
+  b ~ dnorm(mean_prior, mean_sd_prior);
+  c ~ dnorm(mean_prior, mean_sd_prior)
+}
+
+
+init.norandnod <- function(){
+  list(a = 0, b = 0,  c = 0)
+}
+
+params.norandnod <- c("a", "b", "c", "loglike")
 

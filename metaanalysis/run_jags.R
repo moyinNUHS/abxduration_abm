@@ -5,149 +5,111 @@ library(matrixStats)
 library(loo)
 library(ggmcmc)
 
+setwd('~/Documents/nBox/git_projects/abxduration_abm/metaanalysis/')
 source('define_standata.R')
 source('jags.R')
-
-##########################
-### No appropriate antibiotics 
-##########################
-
-# MAIN ANALYSIS WITH 30 days followup cut off, all settings #
 
 #get data 
 out = select.data(
   abx_appropriate_for_resistancetype = 'NO',
-  bacteria_grp = c('Enterobacteriaceae', 'Non fermenters', 'Gram negatives')
+  fu_cutoff = 60,
+  bacteria_grp = c('Enterobacteriaceae', 'Gram negatives'),
+  mean_prior = 0, 
+  mean_sd_prior = 0.1, # sqrt(1/0.1) = 3 
+  sigma_prior1 = 1,  
+  sigma_prior2 = 0.1 
 )
 
 dftocheck = out[[1]]
-lapply(unique(dftocheck$PMID), function(x){
-  unique(dftocheck $time_baseline_endoffu[which(dftocheck$PMID == x)])
-})
-
 jags.data = out[[2]]
 print(paste('There are', max(lengths(jags.data)), 'datapoints from', jags.data$study_N, 'trials.'))
 
 # run model 
-fit <- jags(data = jags.data, inits = init, parameters.to.save = params, model.file = jags.mod,
+
+##### MAIN MODEL 
+fit <- jags(data = jags.data, inits = init.rand, parameters.to.save = params.rand, model.file = jags.rand,
             n.chains = 4, n.iter = 500000, n.burnin = 100000, n.thin = 100, DIC = T)
-
 jags.out = list(jags.data, fit)
+save(jags.out, file = paste0('runs/rand_0313_', Sys.Date(), '.Rdata'))
 
-save(jags.out, file = paste0('runs/jagsOUT_noappro_30d_all_', Sys.Date(), '.Rdata'))
+##### NO RANDOM EFFECTS
+fit <- jags(data = jags.data, inits = init.norand, parameters.to.save = params.norand, model.file = jags.norand,
+            n.chains = 4, n.iter = 500000, n.burnin = 100000, n.thin = 100, DIC = T)
+jags.out = list(jags.data, fit)
+save(jags.out, file = paste0('runs/norand_0313_', Sys.Date(), '.Rdata'))
 
+##### NO D (setting)
+fit <- jags(data = jags.data, inits = init.norandnod, parameters.to.save = params.norandnod, model.file = jags.norandnod,
+            n.chains = 4, n.iter = 500000, n.burnin = 100000, n.thin = 100, DIC = T)
+jags.out = list(jags.data, fit)
+save(jags.out, file = paste0('runs/norand_0313nod_', Sys.Date(), '.Rdata'))
 
-# SENSITIVITY ANALYSIS WITH 60 days followup cut off, all settings #
+##### CHANGE PRIOR
 out = select.data(
   abx_appropriate_for_resistancetype = 'NO',
   fu_cutoff = 60,
-  bacteria_grp = c('Enterobacteriaceae', 'Non fermenters', 'Gram negatives')
+  bacteria_grp = c('Enterobacteriaceae', 'Gram negatives'),
+  mean_prior = 0, 
+  mean_sd_prior = 0.02,   # sqrt(1/0.1) = 7
+  sigma_prior1 = 1, 
+  sigma_prior2 = 0.02
 )
-
-dftocheck = out[[1]]
 jags.data = out[[2]]
-print(paste('There are', max(lengths(jags.data)), 'datapoints from', jags.data$study_N, 'trials.'))
-fit <- jags(data = jags.data, inits = init, parameters.to.save = params, model.file = jags.mod,
+fit <- jags(data = jags.data, inits = init.norandnod, parameters.to.save = params.norandnod, model.file =  jags.norandnod,
             n.chains = 4, n.iter = 500000, n.burnin = 100000, n.thin = 100, DIC = T)
-
 jags.out = list(jags.data, fit)
+save(jags.out, file = paste0('runs/norand_0717nod_', Sys.Date(), '.Rdata'))
 
-save(jags.out, file = paste0('runs/jagsOUT_noappro_60d_all_', Sys.Date(), '.Rdata'))
-
-# SENSITIVITY ANALYSIS WITH 30 days followup cut off, hosp settings #
+###### Sensitivity analysis with 30 days cut off 
+#get data 
 out = select.data(
   abx_appropriate_for_resistancetype = 'NO',
-  setting = c("ICU", "Neonatal unit", "Hospital"),
-  bacteria_grp = c('Enterobacteriaceae', 'Non fermenters', 'Gram negatives')
+  fu_cutoff = 30,
+  bacteria_grp = c('Enterobacteriaceae', 'Gram negatives'),
+  mean_prior = 0, 
+  mean_sd_prior = 0.1, # sqrt(1/0.1) = 3 
+  sigma_prior1 = 1,  
+  sigma_prior2 = 0.1 
 )
-
-dftocheck = out[[1]]
 jags.data = out[[2]]
-print(paste('There are', max(lengths(jags.data)), 'datapoints from', jags.data$study_N, 'trials.'))
-fit <- jags(data = jags.data, inits = init, parameters.to.save = params, model.file = jags.mod,
+fit <- jags(data = jags.data, inits = init.norandnod, parameters.to.save = params.norandnod, model.file = jags.norandnod,
             n.chains = 4, n.iter = 500000, n.burnin = 100000, n.thin = 100, DIC = T)
-
 jags.out = list(jags.data, fit)
+save(jags.out, file = paste0('runs/norandsens_0313nod_', Sys.Date(), '.Rdata'))
 
-save(jags.out, file = paste0('runs/jagsOUT_noappro_30d_hosp_', Sys.Date(), '.Rdata'))
-
-
-###############################################
-### With appropriate antibiotics 
-###############################################
-
-out = select.data(
-  #abx_appropriate_exist = 'NO', 
-  abx_appropriate_for_resistancetype = 'YES',
-  #colonisation_site = c('Gut', 'Gut and respiratory tract',  'Gut or respiratory tract', 'Urine'), 
-  bacteria_grp = c('Enterobacteriaceae', 'Non fermenters', 'Gram negatives')
-)
-
-dftocheck = out[[1]]
-lapply(unique(dftocheck$PMID), function(x){
-  unique(dftocheck$time_baseline_endoffu[which(dftocheck$PMID == x)])
-})
-
-jags.data = out[[2]]
-print(paste('There are', max(lengths(jags.data)), 'datapoints from', jags.data$study_N, 'trials.'))
-
-fit <- jags(data = jags.data, inits = init, parameters.to.save = params, model.file = jags.mod,
-            n.chains = 4, n.iter = 500000, n.burnin = 100000, n.thin = 100, DIC = T)
-
-jags.out = list(jags.data, fit)
-
-save(jags.out, file = paste0('runs/jagsOUT_appro_30d_all_', Sys.Date(), '.Rdata'))
-
-# SENSITIVITY ANALYSIS WITH 60 days followup cut off, all settings #
-out = select.data(
-  abx_appropriate_for_resistancetype = 'YES',
-  fu_cutoff = 60,
-  bacteria_grp = c('Enterobacteriaceae', 'Non fermenters', 'Gram negatives')
-)
-
-dftocheck = out[[1]]
-jags.data = out[[2]]
-print(paste('There are', max(lengths(jags.data)), 'datapoints from', jags.data$study_N, 'trials.'))
-fit <- jags(data = jags.data, inits = init, parameters.to.save = params, model.file = jags.mod,
-            n.chains = 4, n.iter = 500000, n.burnin = 100000, n.thin = 100, DIC = T)
-
-jags.out = list(jags.data, fit)
-
-save(jags.out, file = paste0('runs/jagsOUT_appro_60d_all_', Sys.Date(), '.Rdata'))
-
-# SENSITIVITY ANALYSIS WITH 30 days followup cut off, hosp settings #
-out = select.data(
-  abx_appropriate_for_resistancetype = 'YES',
-  setting = c("ICU", "Neonatal unit", "Hospital"),
-  bacteria_grp = c('Enterobacteriaceae', 'Non fermenters', 'Gram negatives')
-)
-
-dftocheck = out[[1]]
-jags.data = out[[2]]
-print(paste('There are', max(lengths(jags.data)), 'datapoints from', jags.data$study_N, 'trials.'))
-fit <- jags(data = jags.data, inits = init, parameters.to.save = params, model.file = jags.mod,
-            n.chains = 4, n.iter = 500000, n.burnin = 100000, n.thin = 100, DIC = T)
-
-jags.out = list(jags.data, fit)
-
-save(jags.out, file = paste0('runs/jagsOUT_appro_30d_hosp_', Sys.Date(), '.Rdata'))
 
 ###############################################
 ### check models 
 ###############################################
+load('runs/norand_0313_2021-10-27.Rdata')
+fit = jags.out[[2]]
 
 ###1. View trace plots
 traceplot(fit, varname = c('a'))
-traceplot(fit_PT_noint_ward_main[[1]], varname = c('b'))
-traceplot(fit_PT_noint_ward_main[[1]], varname = c('c'))
-traceplot(fit_PT_noint_ward_main[[1]], varname = c('d'))
+traceplot(fit, varname = c('b'))
+traceplot(fit, varname = c('c'))
 
-traceplot(fit_PT_noint_ward_main[[1]], varname = c('a'))
-traceplot(fit_PT_noint_ward_main[[1]], varname = c('b'))
-traceplot(fit_PT_noint_ward_main[[1]], varname = c('c'))
-traceplot(fit_PT_noint_ward_main[[1]], varname = c('d'))
+par(ask=F) 
 
 ###2. Check R hat and effective chains
 summary(fit$BUGSoutput$summary)
-summary(fit_STAFF_noint_ward_main[[1]]$BUGSoutput$summary)
 
+###3. Check WAIC 
+# prepare data 
+check_waic = list()
+files = list.files('runs')[grep('rand_0313', list.files('runs'))]
+for (file in files){
+  
+  load(paste0('runs/', file))
+  
+  all_matrix = jags.out[[2]]$BUGSoutput$sims.matrix
+  loglik_matrix_list = all_matrix[,grep("loglike", colnames(all_matrix))]
+  
+  check_waic[[file]] = waic(loglik_matrix_list, pointwise = TRUE)
+}
+
+out.waic = cbind(check_waic[[1]]$estimates, check_waic[[2]]$estimates, check_waic[[3]]$estimates)
+colnames(out.waic) = c('No random effect est', 'No random effect SE', 
+                       'No random effect noD est', 'No random effect noD SE', 
+                       'With random effect estnod', 'With random effect SEnod')
+out.waic

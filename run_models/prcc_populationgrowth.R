@@ -69,7 +69,7 @@ q.arg <- lapply(parameters, function(l) l[2:3])
 factors <- names(parameters)
 
 abxr.effectiveness = ifelse(parameters$abx.r$max < 0.01, 'zero', 'notzero')
-N = 400
+N = 450
 
 # Check order of variables - MAKE SURE the variable listing and ORDER MATCHES the variable listing input into run_model
 source('models/get_output_absdiff_populationgrowth.R')
@@ -102,7 +102,7 @@ stopCluster(cl)
 
 # Check agreement between runs to decide if our sample size ie size of LHS is adequate 
 # Symmetric Best Measure of Agreement (SBMA) between the PRCC coefficients of two runs with different sample sizes.
-(SBMA <- sbma(LHS.populationgrowth, LHS.populationgrowth2))
+# (SBMA <- sbma(LHS.populationgrowth, LHS.populationgrowth2))
 # value of -1 indicates complete disagreement between the runs 
 # value of 1 indicated complete agreement  (>0.7 acceptable)
 # caveat: if none of the model parameters is monotonically correlated with the output, 

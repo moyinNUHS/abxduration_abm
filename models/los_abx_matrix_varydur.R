@@ -9,7 +9,7 @@
 # 1. define p.r.after (instead of using abx.type ) - such that antibiotics prescribed after admission may vary 
 # 2. generates 1 abx matrix only -since los will differ in both arms
 
-load("~/Documents/nBox/git_projects/indiv_abxduration_incmetaanalysis/indiv_abxduration/models/norm_ecdf.Rdata")
+load("models/norm_ecdf.Rdata")
 
 los_abx_table_varydur <- function(n.bed, n.day, max.los, 
                                   p.infect, p.r.day1, p.r.after, cum.r.1, 
@@ -114,7 +114,18 @@ los_abx_table_varydur <- function(n.bed, n.day, max.los,
   patient.matrix = patient.matrix[rep(1:n.day, each = timestep), ]
   abx.matrix = abx.matrix[rep(1:n.day, each = timestep), ]
   
-  return(list(patient.matrix, abx.matrix))
+  abx.b4 = split(abx.matrix, patient.matrix)
+  abx.b4.fill = lapply(abx.b4, function(x){ 
+    if (any(x >0)){
+      x[min(which(x>0)):length(x)] = 1 
+      x
+    } else {
+      x
+    }
+  })
+  abxb4.matrix = matrix(unlist(abx.b4.fill), ncol = n.bed, nrow = n.day)
+  
+  return(list(patient.matrix, abx.matrix, abxb4.matrix))
 }
 
 

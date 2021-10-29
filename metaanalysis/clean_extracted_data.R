@@ -1,6 +1,6 @@
 ### clean extracted data from literature 
 
-setwd('~/Documents/nBox/git_projects/indiv_abxduration_incmetaanalysis/indiv_abxduration/metaanalysis/')
+setwd('~/Documents/nBox/git_projects/abxduration_abm/metaanalysis/')
 
 library(dplyr)
 library(stringr)
@@ -13,7 +13,7 @@ dat = dat[, c(1:which(colnames(dat) == 'n_ind_outcome'))]
 dat = dat[!is.na(dat$study_no),] 
 
 #############
-# 26 trials #
+# 8 trials #
 #############
 
 ############################################################################################
@@ -56,8 +56,6 @@ dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Amox-clav' & dat$r
 dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Azithromycin' & dat$resistance_type == 'Azithromycin')] = 'YES'
 dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Combination (colistin, tobramycin, and nystatin)' & 
                                                dat$resistance_type %in% c('Resistance to >3 classes/antibiotics', 'ESBL-producing', 'HRMO', 'Gentamicin'))] = 'YES'
-dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Tobramycin and ceftzidime' & 
-                                               dat$resistance_type == 'Tobramycin')] = 'YES'
 dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Nitrofurantoin, trimethoprim or cefalexin' & 
                                                dat$resistance_type %in% c('Cefalexin', 'Amox-clav', 'Nitrofurantoin', 'Trimethoprim',
                                                                           'Trimethoprim-sulfamethoxazole', 'Ciprofloxacin', 'Amoxicillin'))] = 'YES'
@@ -73,6 +71,8 @@ dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Combination (cefot
                                                                           'Vancomycin', 'Meticillin', 'Carbapenem', 'Colistin'))] = 'NO'
 dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Culture directed' & 
                                                dat$resistance_type == 'Ceftazidime or imipenem-resistant')] = 'NO'
+dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Tobramycin and ceftzidime' & 
+                                               dat$resistance_type == 'Tobramycin')] = 'NO'
 dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Amoxicillin' & dat$resistance_type == 'Trimethoprim-sulfamethoxazole')] = 'NO'
 dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Azithromycin' & dat$resistance_type == 'Ampicillin')] = 'NO'
 dat$abx_appropriate_for_resistancetype[which(dat$abx_type == 'Azithromycin' & dat$resistance_type == 'Meticillin')] = 'NO'
@@ -127,19 +127,21 @@ dat$abx_appropriate_exist[which(dat$resistance_type %in% c('Ceftazidime or imipe
 
 #############
 length(unique(dat$PMID))
-# 24 trials #
+# 8 trials #
 #############
+
+############################################################################################
+####  remove 0 days
+
+dat = dat[which(dat$abx_dur > 0),]
 
 ############################################################################################
 #### decide which type of study 
 # 1. those with clear follow up period (days between antibiotic intake and surveillance sample) - binomial distribution
 # 2. those with unclear follow up period (point prevalence) - poisson distribution 
 
-dat$outcome_distribution = 'binomial'
-dat$outcome_distribution[which(dat$time_baseline_endoffu == 'Point prevalence surveys')] = 'poisson'
-
-############################################################################################
-#### decide which type of study 
+#dat$outcome_distribution = 'binomial'
+#dat$outcome_distribution[which(dat$time_baseline_endoffu == 'Point prevalence surveys')] = 'poisson'
 
 ############################################################################################
 #### Get columns
@@ -157,11 +159,10 @@ dat_clean = dat[,c('PMID', #unique study identifier
                    'abx_dur', #duration of antibiotics
                    'time_baseline_endoffu', # follow up time
                    'n_ind_contributedsamples',
-                   'n_ind_outcome',
-                   'outcome_distribution')] # distribution to use to model the outcome
+                   'n_ind_outcome')]
 
 write.csv(dat_clean, file = 'lit_review/clean_extracteddata.csv')
 #############
-# 24 trials #
+# 7 trials #
 #############
 

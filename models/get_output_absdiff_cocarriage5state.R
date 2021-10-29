@@ -4,17 +4,18 @@ source('models/los_abx_matrix_varydur.R')
 source('models/summary_los.R')
 source('models/model_cocarriage5state.R')
 
-get_output_summarystats_cocarriage <- function(n.bed, max.los, 
+get_output_summarystats_cocarriage <- function(n.bed, max.los, n.day,
                                                prop_R, prop_r, prop_Sr, prop_S,
                                                bif, pi_ssr, repop.s, fitness.r, 
-                                               mu, abx.s, abx.r, 
+                                               mu, abx.s, abx.r, dur.type,
                                                p.infect, cum.r.1, p.r.day1, p.r.after,
+                                               timestep, burn_in, iterations,
                                                meanDur){
   
   message(paste0('running ', dur.type, ' duration for ', iterations, ' iterations...'))
   
   # empty matrix to store output - each row is a day, each col is a iteration 
-  iter_totalR = matrix(NA, nrow = n.day, ncol = iterations)
+  iter_totalR = iter_totalRtreated = matrix(NA, nrow = n.day, ncol = iterations)
   iter_newR = c()
   
   for(iter in 1:iterations){ # for each iteration 
@@ -26,6 +27,7 @@ get_output_summarystats_cocarriage <- function(n.bed, max.los,
                                      meanDur = meanDur, timestep=timestep)
     patient.matrix = matrixes[[1]]
     abx.matrix = matrixes[[2]]
+    abxb4.matrix = matrixes[[3]]
     los.array = summary_los(patient.matrix = patient.matrix)
     
     # starting state for all the patients admitted 
@@ -38,6 +40,10 @@ get_output_summarystats_cocarriage <- function(n.bed, max.los,
                                       repop.s=repop.s, abx.r=abx.r, abx.s=abx.s, timestep=timestep)
     
     # summary of the output 
+    ### R carriers amongst those treated with antibiotics
+    total_Rtreated_perday = matrix(rowSums(colo.matrix_filled_iter == "sR" & abxb4.matrix == 1), ncol = timestep, byrow=T)
+    iter_totalRtreated[, iter]= rowMeans(total_Rtreated_perday)
+    
     ### sRs per day 
     total_R_perday = matrix(rowSums(colo.matrix_filled_iter == "sR"), ncol = timestep, byrow=T)
     iter_totalR[, iter]= rowMeans(total_R_perday)
@@ -65,9 +71,12 @@ get_output_summarystats_cocarriage <- function(n.bed, max.los,
   total_R_periter_perday = rowSums(iter_totalR[(burn_in + 1) : nrow(iter_totalR), , drop = FALSE]) / iterations / n.bed
   totalR = mean(total_R_periter_perday) # mean of the days 
   
+  total_Rtreated_periter_perday = rowSums(iter_totalRtreated[(burn_in + 1) : nrow(iter_totalRtreated), , drop = FALSE]) / iterations / n.bed
+  totalRtreated = mean(total_Rtreated_periter_perday) # mean of the days 
+  
   newR = mean(iter_newR) # mean per iteration
   
-  return(c(totalR = totalR, newR = newR))
+  return(c(totalR = totalR, totalRtreated = totalRtreated, newR = newR))
   
 }
 
@@ -116,6 +125,6 @@ run_absdiff_cocarriage5state <- function(n.bed, max.los,
 }
 
 # names of the output columns
-res.names = c('totalR_long', 'newR_long', 
-              'totalR_short', 'newR_short', 
-              'totalR_diff', 'newR_diff')
+res.names = c('totalR_long', 'totalRtreated_long','newR_long', 
+              'totalR_short', 'totalRtreated_short', 'newR_short', 
+              'totalR_diff', 'totalRtreated_diff', 'newR_diff')

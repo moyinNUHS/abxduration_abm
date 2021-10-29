@@ -15,7 +15,7 @@ get_output_summarystats_populationgrowth <- function(n.bed, max.los, n.day,
   message(paste0('running ', dur.type, ' duration for ', iterations, ' iterations...'))
   
   # empty matrix to store output - each row is a day, each col is a iteration 
-  iter_totalR.thres = matrix(NA, nrow = n.day, ncol = iterations)
+  iter_totalR.thres = iter_totalRtreated.thres = matrix(NA, nrow = n.day, ncol = iterations)
   iter_newR = c()
   
   for(iter in 1:iterations){ # for each iteration 
@@ -27,6 +27,7 @@ get_output_summarystats_populationgrowth <- function(n.bed, max.los, n.day,
                                      meanDur = meanDur, timestep=timestep)
     patient.matrix = matrixes[[1]]
     abx.matrix = matrixes[[2]]
+    abxb4.matrix = matrixes[[3]]
     los.array = summary_los(patient.matrix = patient.matrix)
     
     # starting state for all the patients admitted 
@@ -50,6 +51,10 @@ get_output_summarystats_populationgrowth <- function(n.bed, max.los, n.day,
     total_overRthres_perday = matrix(rowSums(df.R >= r_thres_matrix), ncol=timestep, byrow=T)
     iter_totalR.thres[, iter] = rowMeans(total_overRthres_perday)
     
+    ## those who were treated
+    total_overRtreatedthres_perday = matrix(rowSums(df.R >= r_thres_matrix & abxb4.matrix == 1), ncol=timestep, byrow=T)
+    iter_totalRtreated.thres[, iter] = rowMeans(total_overRtreatedthres_perday)
+    
     ### New R at discharge when not admitted as R 
     patient.matrix.exlude.burnin = patient.matrix[((burn_in + 1) : n.day), ]   # patient matrix after the first `burn_in` days 
     patient.id.exlude.burnin = unique(as.vector(patient.matrix.exlude.burnin)) # patient ids admitted after the first `burn_in` days 
@@ -72,9 +77,13 @@ get_output_summarystats_populationgrowth <- function(n.bed, max.los, n.day,
   # Discard first `burn_in` days as burn-in
   total_R_periter_perday = rowSums(iter_totalR.thres[(burn_in + 1) : nrow(iter_totalR.thres), , drop = FALSE]) / iterations / n.bed
   totalR = mean(total_R_periter_perday) # mean of the days 
+  
+  total_Rtreated_periter_perday = rowSums(iter_totalRtreated.thres[(burn_in + 1) : nrow(iter_totalRtreated.thres), , drop = FALSE]) / iterations / n.bed
+  totalRtreated = mean(total_Rtreated_periter_perday) # mean of the days 
+  
   newR = mean(iter_newR) # mean per iteration
   
-  return(c(totalR = totalR, newR = newR))
+  return(c(totalR = totalR, totalRtreated = totalRtreated, newR = newR))
   
 }
 
@@ -117,6 +126,6 @@ run_absdiff_populationgrowth <- function(n.bed, max.los, p.infect, cum.r.1, p.r.
 }
 
 # names of the output columns
-res.names = c('totalR_long', 'newR_long', 
-              'totalR_short', 'newR_short', 
-              'totalR_diff', 'newR_diff')
+res.names = c('totalR_long', 'totalRtreated_long','newR_long', 
+              'totalR_short', 'totalRtreated_short', 'newR_short', 
+              'totalR_diff', 'totalRtreated_diff', 'newR_diff')

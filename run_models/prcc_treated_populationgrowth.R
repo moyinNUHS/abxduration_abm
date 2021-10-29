@@ -58,7 +58,7 @@ parameters <- list(
   r_thres = c("qunif", list(min = 0.01, max = 0.2)),       # r_thres = threshold amount of bacteria before R can be transmitted
   s_growth = c("qunif", list(min = 0.1,max = 2)),   # s_growth = amount transmitted on log scale
   abx.s = c("qunif", list(min = 0.1, max = 1)),       # abx.s = amount of s killed by broad spectrum abx s
-  abx.r = c("qunif", list(min = 0.1, max = 1)),       # abx.r = amount of r killed by broad spectrum abx r
+  abx.r = c("qunif", list(min = 0, max = 0.000000001)),       # abx.r = amount of r killed by broad spectrum abx r
   meanDur = c("qunif", list(min = 1, max = 20))      # mean duration of narrow spectrum antibiotics (normal distribution) 
 )
 

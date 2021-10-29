@@ -26,7 +26,7 @@ require(sensitivity) #load sensitivity package for sensitivity analysis
 require(parallel) # load parallel processing package to use multiple cores on computer (or cluster)
 
 # record errors to debug 
-cl <- makeCluster(detectCores(), outfile = paste0('error_files/parallel_error_cocarriage5state_', Sys.Date(), '.txt'))
+cl <- makeCluster(detectCores()-5, outfile = paste0('error_files/parallel_error_cocarriage5state_', Sys.Date(), '.txt'))
 
 # source functions on all cores
 clusterCall(cl, function() {source('models/get_output_absdiff_cocarriage5state.R')})
@@ -88,15 +88,15 @@ if(all(names(parameters) == formalArgs(run_absdiff_cocarriage5state))){
     image_name = paste0(model, "_", N, "_", abxr.effectiveness, "_", Sys.Date())
     save(LHS.cocarriage, file = paste0("runs/", image_name, ".Rdata"))
     
-    print('calculating 2nd run')
+    # print('calculating 2nd run')
     
     ## run 2
-    N = N + 20
-    old = Sys.time() # get start time
-    LHS.cocarriage2 = LHS(modelRun.cocarriage, factors, N = N, q, q.arg, nboot = 100, cl = cl, res.names = res.names)
-    print(Sys.time() - old) # print elapsed time difference in nice format
-    image_name = paste0(model, "_", N, "_", abxr.effectiveness, "_", Sys.Date())
-    save(LHS.cocarriage2, file = paste0("runs/", image_name, ".Rdata"))
+    # N = N + 20
+    # old = Sys.time() # get start time
+    # LHS.cocarriage2 = LHS(modelRun.cocarriage, factors, N = N, q, q.arg, nboot = 100, cl = cl, res.names = res.names)
+    # print(Sys.time() - old) # print elapsed time difference in nice format
+    # image_name = paste0(model, "_", N, "_", abxr.effectiveness, "_", Sys.Date())
+    # save(LHS.cocarriage2, file = paste0("runs/", image_name, ".Rdata"))
     
 } else {
     

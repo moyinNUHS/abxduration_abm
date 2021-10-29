@@ -10,10 +10,10 @@ run_treated_simple3state <- function(n.bed, max.los,
                                      bif, pi_ssr, repop.s, 
                                      mu, abx.s, abx.r, 
                                      p.infect, cum.r.1, p.r.day1, p.r.after,
-                                     meanDur){
+                                     meanDur, iterations = 100){
   
   timestep = 1
-  iterations = 100 # from AA tests - switch iterations to 1 when doing AA test
+   # from AA tests - switch iterations to 1 when doing AA test
   n.day = 300
   burn_in = 150    # from equilibrium graphs 
   
@@ -36,7 +36,6 @@ run_treated_simple3state <- function(n.bed, max.los,
     abx.matrix = matrixes[[2]]
     los.array = summary_los(patient.matrix = patient.matrix)
     
-    
     # starting state for all the patients admitted 
     colo.matrix = colo.table(patient.matrix = patient.matrix, los = los.array, 
                              prop_R = prop_R, prop_S = prop_S)
@@ -56,25 +55,27 @@ run_treated_simple3state <- function(n.bed, max.los,
       colo.matrix.exclude.burnin = colo.matrix_filled_iter[((burn_in + 1) : n.day), ] # colo matrix after the first `burn_in` days 
       
       abx.list = split(abx.matrix.exlude.burnin, patient.matrix.exlude.burnin)
-      abx.count = unlist(lapply(abx.list, function(x){
+      abx.count = unlist(lapply(abx.list, function(x){ # counts day of antibiotics for each patient 
         x[which(x != 0)] = 1
         unname(unlist(lapply(split(x, cumsum(c(0, diff(x) != 0))), cumsum)))
       }))
    
       for (day in 1:20){ # every day of antibiotic treatment
-        iter_propR_treated_delta[day, iter] = mean(as.vector(colo.matrix.exclude.burnin)[which(abx.count == day)] == 'R') - prop_R
+        # on day `day` of treatment, what states the treated patients are in 
+        Rondaystate = as.vector(colo.matrix.exclude.burnin)[which(abx.count == day)]
+        # the gain in proportion of R on the treated patients with each day 
+        iter_propR_treated_delta[day, iter] = mean(Rondaystate == 'R', na.rm = T) - prop_R
       }
       
       # proportion of R in those treated 
-      iter_propR_treated_ward[iter] = sum(colo.matrix.exclude.burnin[which(abx.matrix.exlude.burnin > 0)] == 'R') / 
-        sum(abx.matrix.exlude.burnin > 0)
+      iter_propR_treated_ward[iter] = mean(colo.matrix.exclude.burnin[which(abx.matrix.exlude.burnin > 0)] == 'R') 
       
     } 
 
   }
   
   propR_treated_delta = rowMeans(iter_propR_treated_delta, na.rm = T) # mean per iteration
-  propR_treated_delta_diffavg = mean(diff(propR_treated_delta[!is.na(propR_treated_delta)]))
+  propR_treated_delta_diffavg = mean(diff(propR_treated_delta[!is.na(propR_treated_delta)])) # mean difference with additional day of antibiotic
   propR_treated_ward = mean(iter_propR_treated_ward)
   
   return(c(propR_treated_delta, propR_treated_delta_diffavg, propR_treated_ward))

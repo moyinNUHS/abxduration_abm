@@ -58,7 +58,7 @@ save(plots_data, file=paste0("./runs/heatmap2by2_", model,Sys.time(), ".Rdata"))
 
 
 # plot heatmap
-source('plot_functions/plot_heatmap.R')
+source('plots/plot_functions/plot_heatmap.R')
 plots_data = get(load(paste0('./runs/heatmap2by2_simple.Rdata')))
 plot_heatmap (model = 'simple', plots_data = plots_data)
 ggsave(filename = paste0('../../../../../Desktop/heatmap_simple.pdf'), 

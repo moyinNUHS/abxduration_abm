@@ -51,7 +51,7 @@ parameters <- list(
     repop.s = c("qunif", list(min=0.02, max=0.12)),  # "repop.s" probability of ss repopulated to S (Palleja, Nature Biology, 2018 on gut recovery ~9 months)
     mu = c("qunif", list(min=0.002, max=0.02)),      # "mu", probability of decolonisation (Haggai Bar-Yoseph, JAC, 2016, decreasing colonization rates from 76.7% (95% CI=69.3%–82.8%) at 1 month to 35.2% (95% CI=28.2%–42.9%) at 12 months of follow-up)
     abx.s = c("qunif", list(min=0.1, max=0.5)),      # "abx.s", probability of S becoming ss after being on narrow spectrum antibiotics
-    abx.r = c("qunif", list(min=0, max=0.000000001)),  # "abx.r", probability of R becoming ss after being on broad spectrum antibiotics
+    abx.r = c("qunif", list(min=0, max=0.00000001)),  # "abx.r", probability of R becoming ss after being on broad spectrum antibiotics
     p.infect = c("qunif", list(min=0.1, max=1)),     # "p.infect", probability of being prescribed antibiotics
     cum.r.1 = c("qunif", list(min=30, max= 300)),    # admission day when cummulative prabability of HAI requiring abx.r is 1
     p.r.day1 = c("qunif", list(min=0.1, max= 1)),    # probability of being prescribed broad spectrum antibiotic on admission 
@@ -66,7 +66,7 @@ q.arg <- lapply(parameters, function(l) l[2:3])
 factors <- names(parameters)
 
 abxr.effectiveness = ifelse(parameters$abx.r$max < 0.01, 'zero', 'notzero')
-N = 400
+N = 450
 
 # Check order of variables - MAKE SURE the variable listing and ORDER MATCHES the variable listing input into run_model
 source('models/get_output_absdiff_simple3state.R')
@@ -84,12 +84,12 @@ if(all(names(parameters) == formalArgs(run_absdiff_simple3state))){
     print('calculating 2nd run')
     
     ## run 2 
-    N = N + 20
-    old = Sys.time() # get start time
-    LHS.simple2 = LHS(modelRun.simple, factors, N = N, q, q.arg, nboot = 100, cl = cl)
-    print(Sys.time() - old) # print elapsed time difference in nice format
-    image_name = paste0(model, "_", N, "_", abxr.effectiveness, "_", Sys.Date())
-    save(LHS.simple2, file = paste0("runs/", image_name, ".Rdata"))
+    # N = N + 20
+    # old = Sys.time() # get start time
+    # LHS.simple2 = LHS(modelRun.simple, factors, N = N, q, q.arg, nboot = 100, cl = cl)
+    # print(Sys.time() - old) # print elapsed time difference in nice format
+    # image_name = paste0(model, "_", N, "_", abxr.effectiveness, "_", Sys.Date())
+    # save(LHS.simple2, file = paste0("runs/", image_name, ".Rdata"))
     
 } else {
     
@@ -100,7 +100,7 @@ stopCluster(cl)
 
 # Check agreement between runs to decide if our sample size ie size of LHS is adequate 
 # Symmetric Best Measure of Agreement (SBMA) between the PRCC coefficients of two runs with different sample sizes.
-(SBMA <- sbma(LHS.simple, LHS.simple2))
+# (SBMA <- sbma(LHS.simple, LHS.simple2))
 # value of -1 indicates complete disagreement between the runs 
 # value of 1 indicated complete agreement  (>0.7 acceptable)
 # caveat: if none of the model parameters is monotonically correlated with the output, 

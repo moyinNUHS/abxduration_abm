@@ -35,11 +35,11 @@ plot.data = rbind(simple_cre_data, simple_3gcre_data,
                   populationgrowth_cre_data, populationgrowth_3gcre_data)
 plot.data$model = as.factor(plot.data$model)
 plot.data$model = factor(plot.data$model, levels = c('simple3state', 'cocarriage5state', 'populationgrowth'), 
-                         labels = c('Simple 3-state', 'Co-carriage 5-state', 'Population growth'))
+                         labels = c('Exclusive colonisation', 'Co-colonisation', 'Within-host growth'))
 plot.data$scenario = as.factor(plot.data$scenario)
 plot.data$scenario = factor(plot.data$scenario, levels = c('3gcre', 'cre'), 
-                            labels = c('Third-generation cephalosporin\nresistant Enterobacteriaceae',
-                                       'Carbapenem-resistant Enterobacteriaceae'))
+                            labels = c('Administered antibiotics active against\nboth resistant and susceptible organisms',
+                                       'Administered antibiotics active against\nonly susceptible organisms'))
 
 # save data 
 save(plot.data, file = paste0('runs/stability_plot_data', Sys.Date(), '.Rdata'))

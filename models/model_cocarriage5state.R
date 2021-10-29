@@ -1,4 +1,4 @@
-source('~/Documents/nBox/git_projects/indiv_abxduration_incmetaanalysis/indiv_abxduration/models/msm_util_rtnorm.R')
+source('models/msm_util_rtnorm.R')
 
 ## Co-carriage 5 state model 
 # allows co-carriage of R and S bacteria 
