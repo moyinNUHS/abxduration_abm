@@ -11,16 +11,12 @@
 rm(list = ls())
 
 # set working directory 
-working.directory.main = '~/Documents/nBox/git_projects/indiv_abxduration(inc metaanalysis)/indiv_abxduration/'
-setwd(working.directory.main)
+setwd('~/Documents/nBox/git_projects/abxduration_abm')
 
 # load libraries 
 require(pse)         #load pse package for Latin Hypercube
 require(sensitivity) #load sensitivity package for sensitivity analysis 
 require(spartan)     #for AA 
-
-# workhorse function 
-source('AA_tests/get_AA.R')
 
 #=======================#
 #  Consistency testing  #
@@ -29,17 +25,22 @@ source('AA_tests/get_AA.R')
 
 # NOTE: 
 # run the models with iteration = 1 
-# make sure in the main working directory, AA_tests/AA_runs/`model`/abxrZERO and AA_tests/AA_runs/`model`/abxrNOTZERO already created
+iterationstotry = c(5, 50, 100, 125, 150)
 
-# simple 3 state model 
-get_AA(model = 'simple3state', abx.r.upper = 0.5, iterationstotry =  c(5, 50, 100, 125, 150)) 
-get_AA(model = 'simple3state', abx.r.upper = 0.00001, iterationstotry = c(5, 50, 100, 125, 150)) 
+torun = list(list(model = 'simple3state', abx.r.upper = 0.5, iterationstotry = iterationstotry), 
+             list(model = 'simple3state', abx.r.upper = 0.00001, iterationstotry =  iterationstotry), 
+             list(model = 'cocarriage5state', abx.r.upper = 0.5, iterationstotry =  iterationstotry), 
+             list(model = 'cocarriage5state', abx.r.upper = 0.00001, iterationstotry =  iterationstotry), 
+             list(model = 'populationgrowth', abx.r.upper = 0.5, iterationstotry =  iterationstotry), 
+             list(model = 'populationgrowth', abx.r.upper = 0.00001, iterationstotry =  iterationstotry))
 
-# cocarriage 5 state model 
-get_AA(model = 'cocarriage5state', abx.r.upper = 0.5, iterationstotry = c(5, 50, 100, 125, 150)) 
-get_AA(model = 'cocarriage5state', abx.r.upper = 0.00001, iterationstotry = c(5, 50, 100, 125, 150)) 
-
-# population growth model 
-get_AA(model = 'populationgrowth', abx.r.upper = 0.8, iterationstotry = c(5, 50, 100, 125, 150)) 
-get_AA(model = 'populationgrowth', abx.r.upper = 0.00001, iterationstotry = c(5, 50, 100, 125, 150)) 
+for (i in 1:length(torun)){
+  
+  dat = torun[[i]]
+  model = dat[['model']]
+  abx.r.upper = dat[['abx.r.upper']]
+  iterationstotry = dat[['iterationstotry']]
+  
+  source('AA_tests/get_AA.R')
+}
 

@@ -44,7 +44,7 @@ get.stability.data <- function (model, iterations, scenario) {
       # get matrix of length of stay, abx prescribed, patients admitted
       matrixes = los_abx_table_varydur(n.bed = x[['n.bed']], n.day = x[['n.day']], max.los = x[['max.los']], 
                                        p.infect = x[['p.infect']], p.r.day1 = x[['p.r.day1']], p.r.after = x[['p.r.after']], 
-                                       cum.r.1 = x[['cum.r.1']], 
+                                       p.infect.after = x[['p.infect.after']], 
                                        meanDur = x[['short_dur']], timestep = x[['timestep']])
       patient.matrix = matrixes[[1]]
       abx.matrix = matrixes[[2]]
@@ -73,7 +73,7 @@ get.stability.data <- function (model, iterations, scenario) {
       # get matrix of length of stay, abx prescribed, patients admitted
       matrixes = los_abx_table_varydur(n.bed = x[['n.bed']], n.day = x[['n.day']], max.los = x[['max.los']], 
                                        p.infect = x[['p.infect']], p.r.day = x[['p.r.day1']], p.r.after = x[['p.r.after']], 
-                                       cum.r.1 = x[['cum.r.1']], 
+                                       p.infect.after = x[['p.infect.after']], 
                                        meanDur = x[['long_dur']], timestep = x[['timestep']])
       patient.matrix = matrixes[[1]]
       abx.matrix = matrixes[[2]]
@@ -110,7 +110,7 @@ get.stability.data <- function (model, iterations, scenario) {
       # get matrix of length of stay, abx prescribed, patients admitted
       matrixes = los_abx_table_varydur(n.bed= x[['n.bed']], n.day= x[['n.day']], max.los= x[['max.los']], 
                                        p.infect= x[['p.infect']], p.r.day1= x[['p.r.day1']], p.r.after = x[['p.r.after']], 
-                                       cum.r.1= x[['cum.r.1']], 
+                                       p.infect.after= x[['p.infect.after']], 
                                        meanDur= x[['short_dur']], timestep= x[['timestep']])
       patient.matrix=matrixes[[1]]
       abx.matrix = matrixes[[2]]
@@ -138,7 +138,7 @@ get.stability.data <- function (model, iterations, scenario) {
       # get matrix of length of stay, abx prescribed, patients admitted
       matrixes = los_abx_table_varydur(n.bed= x[['n.bed']], n.day= x[['n.day']], max.los= x[['max.los']], 
                                        p.infect= x[['p.infect']], p.r.day1= x[['p.r.day1']], p.r.after = x[['p.r.after']], 
-                                       cum.r.1= x[['cum.r.1']], 
+                                       p.infect.after= x[['p.infect.after']], 
                                        meanDur= x[['long_dur']], timestep= x[['timestep']])
       patient.matrix = matrixes[[1]]
       abx.matrix = matrixes[[2]]
@@ -171,7 +171,7 @@ get.stability.data <- function (model, iterations, scenario) {
       # get matrix of length of stay, abx prescribed, patients admitted
       matrixes = los_abx_table_varydur(n.bed= x[['n.bed']], n.day= x[['n.day']], max.los= x[['max.los']], 
                                        p.infect= x[['p.infect']], p.r.day1= x[['p.r.day1']], p.r.after = x[['p.r.after']],
-                                       cum.r.1= x[['cum.r.1']], 
+                                       p.infect.after= x[['p.infect.after']], 
                                        meanDur= x[['short_dur']], timestep= x[['timestep']])
       patient.matrix=matrixes[[1]]
       abx.matrix=matrixes[[2]]
@@ -207,7 +207,7 @@ get.stability.data <- function (model, iterations, scenario) {
       # get matrix of length of stay, abx prescribed, patients admitted
       matrixes = los_abx_table_varydur(n.bed= x[['n.bed']], n.day= x[['n.day']], max.los= x[['max.los']], 
                                        p.infect= x[['p.infect']], p.r.day1= x[['p.r.day1']], p.r.after = x[['p.r.after']],
-                                       cum.r.1= x[['cum.r.1']], 
+                                       p.infect.after= x[['p.infect.after']], 
                                        meanDur= x[['long_dur']], timestep= x[['timestep']])
       patient.matrix=matrixes[[1]]
       abx.matrix=matrixes[[2]]

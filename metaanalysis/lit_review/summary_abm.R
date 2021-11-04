@@ -12,15 +12,15 @@ table(d$interven_type)
 
 7/187
 
-d = data.frame(x1 = c(7, 18, 4, 18, 8),
-              n1 = c(94, 222, 130, 127, 30), 
-              x2 = c(19, 38, 12, 17, 5), 
-              n2 = c(101, 233, 130, 127, 30))
+d = data.frame(x1 = c(5, 28, 7, 8, 8), # short outcome
+               n1 = c(70, 222, 77, 64, 30), #short n
+               x2 = c(5, 38, 12, 9, 5), #long outcome
+               n2 = c(124, 233, 65, 60, 30)) # long n
 apply(d, 1, function(x){
   
   out = prop.test(x = c(x['x1'], x['x2']), n = c(x['n1'], x['n2']))
   
   return(c(estimate = round(diff(out$estimate),2)*100, 
-         lower.upper = round(out$conf.int,2)*100))
+           lower.upper = sort(-round(out$conf.int,2)*100)))
   
 })

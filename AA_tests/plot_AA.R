@@ -26,7 +26,7 @@ for (model in c('simple3state', 'cocarriage5state', 'populationgrowth')){
   setwd(paste0(working.directory.main, "AA_tests/AA_runs/", model))
   combine.d = rbind(read.csv('abxrNOTZERO/AA_ATestMaxAndMedians.csv'), 
                     read.csv('abxrZERO/AA_ATestMaxAndMedians.csv'))
-  d = combine.d[, c('samplesize', 'totalR_diffMaxA', 'newR_diffMaxA')] # using max instead of median to be conservative
+  d = combine.d[, c('samplesize', 'totalRtreated_diffMaxA', 'totalR_diffMaxA', 'newR_diffMaxA')] # using max instead of median to be conservative
   d$abxr = rep(c('3gcre', 'cre'), each = nrow(d)/2)
   d$model = model
   d.melt = reshape2::melt(d, id.vars = c('samplesize', 'abxr', 'model'))
@@ -38,21 +38,24 @@ plot.data$model = as.factor(plot.data$model)
 plot.data$model = factor(plot.data$model, levels = c('simple3state', 
                                                      'cocarriage5state', 
                                                      'populationgrowth'),
-                         labels = c('Simple 3-state',
-                                    'Co-carriage 5-state', 
-                                    'Population growth'))
+                         labels = c('Exclusive colonisation',
+                                    'Co-colonisation', 
+                                    'Within-host growth'))
 plot.data$abxr = as.factor(plot.data$abxr)
 plot.data$abxr = factor(plot.data$abxr, 
                         levels = c('3gcre', 'cre'), 
-                        labels = c('Third-generation cephalosporin resistant', 'Carbapenem resistant'))
+                        labels = c('Administered antibiotics active against\nboth susceptible and resistant organisms', 
+                                   'Administered antibiotics active against\nonly resistant organisms'))
 
 plot = ggplot(plot.data, aes(x = samplesize, y = value, group = scenario, color = variable)) + 
   geom_line() + 
   ylab('Maximum A-Test scores for each sample size') + 
   xlab('Sample size') +
-  scale_color_manual(values = c('#545E56', '#23B5D3'), 
-                     labels = c('Proportion of resistance carriers per day',
-                                'Proportion of non-resistance carriers acquiring\nresistance during admission')) +
+  scale_color_manual(values = c('#545E56', '#23B5D3', '#BAFF29'), 
+                     labels = c('Treated individuals',
+                                'Overall ward population',
+                                'Non-resistance carriers acquiring\nresistance during admission'), 
+                     name = 'Model outputs in terms of the difference in proportion of\nresistance carriers between the long and short wards in:') +
   geom_hline(yintercept = 0.56, linetype="dashed", color = "red", size = 0.3) +
   geom_hline(yintercept = 0.66, linetype="dashed", color = "red", size = 0.3) +
   geom_hline(yintercept = 0.73, linetype="dashed", color = "red", size = 0.3) +
@@ -63,12 +66,13 @@ plot = ggplot(plot.data, aes(x = samplesize, y = value, group = scenario, color 
   facet_grid(model ~ abxr) +
   theme_minimal() + 
   theme(legend.position = 'bottom', 
-        legend.title = element_blank(), 
-        text = element_text(size = 15))
+        text = element_text(size = 15)) +
+  guides(color = guide_legend(title.position="top"))
 
 ## plot 
-pdf("~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/AA.pdf", 
-    width = 8, height = 10) 
+png("~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/AA.png", 
+    res = 400,
+    width = 9, height = 10, units = 'in')
 plot
 dev.off() 
 

@@ -7,7 +7,7 @@ get_output_trialdata_varydur_cocarriage <- function(n.bed, max.los, n.day,
                                                     prop_R, prop_r, prop_Sr, prop_S,
                                                     bif, pi_ssr, repop.s, fitness.r,
                                                     mu, abx.s, abx.r, 
-                                                    p.infect, cum.r.1, p.r.day1, p.r.after,
+                                                    p.infect, p.infect.after, p.r.day1, p.r.after,
                                                     meanDur, dur.type, timestep, iterations, burn_in){
   
   message(paste0('running ', dur.type, ' duration for ', iterations, ' iterations...'))

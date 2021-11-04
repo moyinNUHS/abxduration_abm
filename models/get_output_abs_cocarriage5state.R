@@ -8,7 +8,7 @@ run_abs_cocarriage5state <- function(n.bed, max.los,
                                      prop_R, prop_r, prop_Sr, prop_S,
                                      bif, pi_ssr, repop.s, fitness.r, 
                                      mu, abx.s, abx.r, 
-                                     p.infect, cum.r.1, p.r.day1, p.r.after,
+                                     p.infect, p.infect.after, p.r.day1, p.r.after,
                                      meanDur, iterations = 100){
   
   timestep = 1
@@ -27,7 +27,7 @@ run_abs_cocarriage5state <- function(n.bed, max.los,
       # get matrix of length of stay, abx prescribed, patients admitted
       matrixes = los_abx_table_varydur(n.bed=n.bed, n.day=n.day, max.los=max.los, 
                                        p.infect=p.infect, p.r.day1=p.r.day1, p.r.after = p.r.after, 
-                                       cum.r.1=cum.r.1, 
+                                       p.infect.after=p.infect.after, 
                                        meanDur = meanDur, timestep=timestep)
       patient.matrix = matrixes[[1]]
       abx.matrix = matrixes[[2]]

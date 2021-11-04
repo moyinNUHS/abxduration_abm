@@ -9,7 +9,7 @@ get_output_summarystats_populationgrowth <- function(n.bed, max.los, n.day,
                                                      prop_R, r_thres, K, total_prop,
                                                      pi_ssr, s_growth, fitness.r, r_trans,
                                                      abx.s, abx.r, 
-                                                     p.infect, cum.r.1, p.r.day1, p.r.after,
+                                                     p.infect, p.infect.after, p.r.day1, p.r.after,
                                                      meanDur, dur.type, timestep, iterations, burn_in){
   
   message(paste0('running ', dur.type, ' duration for ', iterations, ' iterations...'))
@@ -23,7 +23,7 @@ get_output_summarystats_populationgrowth <- function(n.bed, max.los, n.day,
     # get matrix of length of stay, abx prescribed, patients admitted
     matrixes = los_abx_table_varydur(n.bed=n.bed, n.day=n.day, max.los=max.los, 
                                      p.infect=p.infect, p.r.day1=p.r.day1, p.r.after = p.r.after, 
-                                     cum.r.1=cum.r.1, 
+                                     p.infect.after=p.infect.after, 
                                      meanDur = meanDur, timestep=timestep)
     patient.matrix = matrixes[[1]]
     abx.matrix = matrixes[[2]]
@@ -88,7 +88,7 @@ get_output_summarystats_populationgrowth <- function(n.bed, max.los, n.day,
 }
 
 # function to run the model 
-run_absdiff_populationgrowth <- function(n.bed, max.los, p.infect, cum.r.1, p.r.day1, p.r.after,
+run_absdiff_populationgrowth <- function(n.bed, max.los, p.infect, p.infect.after, p.r.day1, p.r.after,
                                          K, total_prop,  prop_R, pi_ssr, 
                                          r_trans, fitness.r, r_thres, s_growth,
                                          abx.s, abx.r, short_dur,long_dur){
@@ -103,7 +103,7 @@ run_absdiff_populationgrowth <- function(n.bed, max.los, p.infect, cum.r.1, p.r.
   ############ 
   #### SHORT DURATION 
   
-  short_output = get_output_summarystats_populationgrowth(n.bed = n.bed, n.day = n.day, max.los = max.los, cum.r.1 = cum.r.1,
+  short_output = get_output_summarystats_populationgrowth(n.bed = n.bed, n.day = n.day, max.los = max.los, p.infect.after = p.infect.after,
                                                           prop_R = prop_R, r_thres = r_thres, K = K, total_prop = total_prop,
                                                           pi_ssr = pi_ssr,  s_growth = s_growth, fitness.r = fitness.r, r_trans = r_trans,
                                                           abx.r = abx.r, abx.s = abx.s, timestep = timestep, iterations = iterations,
@@ -113,7 +113,7 @@ run_absdiff_populationgrowth <- function(n.bed, max.los, p.infect, cum.r.1, p.r.
   ############ 
   #### LONG DURATION 
   
-  long_output = get_output_summarystats_populationgrowth(n.bed = n.bed, n.day = n.day, max.los = max.los, cum.r.1 = cum.r.1,
+  long_output = get_output_summarystats_populationgrowth(n.bed = n.bed, n.day = n.day, max.los = max.los, p.infect.after = p.infect.after,
                                                           prop_R = prop_R, r_thres = r_thres, K = K, total_prop = total_prop,
                                                           pi_ssr = pi_ssr,  s_growth = s_growth, fitness.r = fitness.r, r_trans = r_trans,
                                                           abx.r = abx.r, abx.s = abx.s, timestep = timestep, iterations = iterations,

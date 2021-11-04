@@ -24,7 +24,7 @@ parameters = factor(unique(c(names(unlist(as.list(args(run_absdiff_simple3state)
                              names(unlist(as.list(args(run_absdiff_cocarriage5state)))), 
                              names(unlist(as.list(args(run_absdiff_populationgrowth)))))), 
                     levels = rev(c("n.bed", "max.los",  #ward level
-                                   "p.infect", "p.r.day1", "cum.r.1", "p.r.after", #Number of antibiotic prescriptions 
+                                   "p.infect", "p.r.day1", "p.infect.after", "p.r.after", #Number of antibiotic prescriptions 
                                    "prop_S", "prop_Sr","prop_r","prop_R", "total_prop", "K", #Carriage status on day one of admission to the ward 
                                    "repop.s","s_growth", #Regrowth of susceptible Enterobacteriaceae 
                                    "fitness.r",  #Regrowth of resistant Enterobacteriaceae 
@@ -43,29 +43,25 @@ param.labels = c("n", "l",  #ward level
                  "t_short", "t_long")
 
 #### Input run data required for plotting parameter heatmap 
-lhs.list.abs = list('runs/simple3state_450_notzero_2021-10-26.Rdata',
-                    'runs/cocarriage5state_400_notzero_2021-10-26.Rdata',
-                    'runs/populationgrowth_450_notzero_2021-10-26.Rdata',
-                    'runs/simple3state_450_zero_2021-10-26.Rdata',
-                    'runs/cocarriage5state_400_zero_2021-10-26.Rdata',
-                    'runs/populationgrowth_450_zero_2021-10-26.Rdata')
-lhs.list.treated = list('runs/simple3state_450_notzero_2021-10-26.Rdata',
-                        'runs/cocarriage5state_400_zero_2021-10-26.Rdata',
-                        'runs/cocarriage5state_400_notzero_2021-10-26.Rdata',
-                        'runs/populationgrowth_450_notzero_2021-10-26.Rdata',
-                        'runs/simple3state_450_zero_2021-10-26.Rdata',
-                        'runs/populationgrowth_450_zero_2021-10-26.Rdata')
+lhs.list = list('runs/simple3state_500_notzero_2021-10-30.Rdata',
+                'runs/cocarriage5state_500_notzero_2021-10-31.Rdata',
+                'runs/populationgrowth_500_notzero_2021-10-31.Rdata',
+                'runs/simple3state_500_zero_2021-10-30.Rdata',
+                'runs/cocarriage5state_500_zero_2021-10-31.Rdata',
+                'runs/populationgrowth_500_zero_2021-10-31.Rdata')
 
 ### plot prcc for resistance carrier prevalence
 # get ranking positions of the parameters 
-ranks.list.totalR = lapply(lhs.list.abs, getposition, outcome.type = 'totalR_diff')
-ranks.list.newR = lapply(lhs.list.abs, getposition, outcome.type = 'newR_diff')
-ranks.list.treated = lapply(lhs.list.treated, getposition, outcome.type = 'totalRtreated_diff')
+ranks.list.totalR = lapply(lhs.list, getposition, outcome.type = 'totalR_diff')
+ranks.list.newR = lapply(lhs.list, getposition, outcome.type = 'newR_diff')
+ranks.list.treated = lapply(lhs.list, getposition, outcome.type = 'totalRtreated_diff')
 
 # prepare data for plot 
 plot.df = clean_ranks_data(treated = ranks.list.treated, 
                            totalR = ranks.list.totalR, 
                            newR = ranks.list.newR)
+
+p = plot_paraheatmap(plot.df)
 
 png('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/final_main/para_heatmap.png', 
     width = 8500, height = 5000, res = 500)

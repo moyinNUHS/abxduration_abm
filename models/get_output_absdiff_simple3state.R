@@ -9,7 +9,7 @@ get_output_summarystats_simple <- function(n.bed, max.los, n.day,
                                            prop_R, prop_S,
                                            bif, pi_ssr, repop.s, 
                                            mu, abx.s, abx.r, 
-                                           p.infect, cum.r.1, p.r.day1, p.r.after,
+                                           p.infect, p.infect.after, p.r.day1, p.r.after,
                                            meanDur, dur.type, timestep, iterations, burn_in){
   
   message(paste0('running ', dur.type, ' duration for ', iterations, ' iterations...'))
@@ -23,7 +23,7 @@ get_output_summarystats_simple <- function(n.bed, max.los, n.day,
     # get matrix of length of stay, abx prescribed, patients admitted
     matrixes = los_abx_table_varydur(n.bed=n.bed, n.day=n.day, max.los=max.los, 
                                      p.infect=p.infect, p.r.day1=p.r.day1, p.r.after = p.r.after, 
-                                     cum.r.1=cum.r.1, 
+                                     p.infect.after=p.infect.after, 
                                      meanDur = meanDur, timestep=timestep)
     patient.matrix = matrixes[[1]]
     abx.matrix = matrixes[[2]]
@@ -85,21 +85,21 @@ get_output_summarystats_simple <- function(n.bed, max.los, n.day,
 run_absdiff_simple3state <- function(n.bed, max.los, 
                                      prop_R, prop_S, 
                                      bif, pi_ssr, repop.s, mu, abx.s, abx.r,
-                                     p.infect, cum.r.1, p.r.day1, p.r.after, short_dur, long_dur,
-                                     iterations = 100){
+                                     p.infect, p.infect.after, p.r.day1, p.r.after, short_dur, long_dur){
   
   message('simple 3 state model initiating...')
   
-  timestep = 1# from AA tests - switch iterations to 1 when doing AA test
+  timestep = 1
   n.day = 300
   burn_in = 150    # from equilibrium graphs 
+  iterations = 100 # from AA tests - switch iterations to 1 when doing AA test
   
   ############ 
   #### SHORT DURATION 
   
   short_output = get_output_summarystats_simple(n.bed = n.bed, n.day = n.day, max.los = max.los, 
                                                 p.infect = p.infect, p.r.day1 = p.r.day1, p.r.after = p.r.after, 
-                                                cum.r.1 = cum.r.1, 
+                                                p.infect.after = p.infect.after, 
                                                 meanDur = short_dur, dur.type = 'short',
                                                 prop_R = prop_R, prop_S = prop_S, 
                                                 pi_ssr = pi_ssr, bif = bif, mu = mu, 
@@ -112,7 +112,7 @@ run_absdiff_simple3state <- function(n.bed, max.los,
   
   long_output = get_output_summarystats_simple(n.bed = n.bed, n.day = n.day, max.los = max.los, 
                                                 p.infect = p.infect, p.r.day1 = p.r.day1, p.r.after = p.r.after, 
-                                                cum.r.1 = cum.r.1, 
+                                                p.infect.after = p.infect.after, 
                                                 meanDur = long_dur, dur.type = 'long',
                                                 prop_R = prop_R, prop_S = prop_S, 
                                                 pi_ssr = pi_ssr, bif = bif, mu = mu, 

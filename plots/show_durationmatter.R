@@ -15,12 +15,12 @@ library(stringr)
 source('plots/plot_functions/plot_durationmatter.R')
 
 #load data
-lhs.list.abs = list('runs/simple3state_450_notzero_2021-10-26.Rdata',
-                    'runs/cocarriage5state_400_notzero_2021-10-26.Rdata',
-                    'runs/populationgrowth_450_notzero_2021-10-26.Rdata',
-                    'runs/simple3state_450_zero_2021-10-26.Rdata',
-                    'runs/cocarriage5state_400_zero_2021-10-26.Rdata',
-                    'runs/populationgrowth_450_zero_2021-10-26.Rdata')
+lhs.list.abs = list('runs/simple3state_500_notzero_2021-10-30.Rdata',
+                    'runs/cocarriage5state_500_notzero_2021-10-31.Rdata',
+                    'runs/populationgrowth_500_notzero_2021-10-31.Rdata',
+                    'runs/simple3state_500_zero_2021-10-30.Rdata',
+                    'runs/cocarriage5state_500_zero_2021-10-31.Rdata',
+                    'runs/populationgrowth_500_zero_2021-10-31.Rdata')
 
 #put data into dataframe 
 plot.data.totalR = make.plot.d(lapply(lhs.list.abs, make.df, outcome.type = 'totalR_diff'))
@@ -65,8 +65,8 @@ quant.data$outcome = factor(quant.data$outcome,
                             levels = c('totalRtreated_diff','totalR_diff', 'newR_diff'),
                             labels = c(totalRtreated_label, totalR_label, newR_label))
 
-eff.lab = 'Administered antibiotic active against\nsusceptible and resistant organisms'
-ineff.lab = 'Administered antibiotic active against\nonly susceptible organisms'
+eff.lab = 'Administered antibiotic active against susceptible and resistant organisms'
+ineff.lab = 'Administered antibiotic active against only susceptible organisms'
 
 quant.data$model.abxr = as.factor(quant.data$model.abxr)
 quant.data$model.abxr = factor(quant.data$model.abxr, 
@@ -86,7 +86,7 @@ quant.data$arrow.lab.left[which(quant.data$outcome == totalRtreated_label)] = 'M
 quant.data$arrow.lab.right = NA
 quant.data$arrow.lab.right[which(quant.data$outcome == totalRtreated_label)] = 'More resistance carriers in the long duration ward\n'
 
-arrow.lab.x = 0.25
+arrow.lab.x = 0.3
 arrow.lab.y = 1.4
 arrow.y = 1.4
 arrow.x = c(0, 0.5)
@@ -135,8 +135,8 @@ for (o in levels(quant.data$outcome)) {
       geom_point(size = 3, colour = 'white', shape = 16, position = position_dodge(width = 0.4)) +
       scale_color_manual(values = c('#15616D', '#70C1B3', '#FE938C'), name = 'Models',
                          limits = rev(levels(quant.data$model))) +
-      scale_x_continuous(limit = (c(-arrow.x[2], max(quant.data$`97.5%`))), 
-                         breaks = round(seq(round(-max(quant.data$`97.5%`) + 0.2, 1), round(max(quant.data$`97.5%`), 1), by = 0.1), 2)) + 
+      scale_x_continuous(limit = (c(-max(quant.data$`97.5%`), max(quant.data$`97.5%`))), 
+                         breaks = round(seq(round(-max(quant.data$`97.5%`) + 0.05, 1), round(max(quant.data$`97.5%`), 1), by = 0.1), 2)) + 
       geom_vline(xintercept = 0, linetype = 'dashed')+
       labs(y= '', x  ='')+
       theme_bw() +
@@ -179,6 +179,7 @@ for (o in levels(quant.data$outcome)) {
 }
 
 p = ggarrange(plotlist = p, nrow = 3, ncol = 2, common.legend = T, legend = 'bottom')
+p
 
 ggsave('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/final_main/durationmatter.png',  
        width = 22.5, height = 10)

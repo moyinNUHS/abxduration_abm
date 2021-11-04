@@ -120,19 +120,20 @@ get_metajags_plotdata <- function(saved_jagsoutput, days = 10){
 }
 
 days = 15
-dat = get_metajags_plotdata(saved_jagsoutput = 'runs/norand_0313nod_2021-10-27.Rdata', days = days)
+dat = get_metajags_plotdata(saved_jagsoutput = 'runs/randnod_0717_2021-11-02.Rdata', days = days)
 
 mean = (dat[[3]][1])
 low = (dat[[3]][2]) 
 high = (dat[[3]][3]) 
 
-dat[[1]]$actual = dat[[1]]$actual/dat[[1]]$sample_size
+#dat[[1]]$actual = dat[[1]]$actual/dat[[1]]$sample_size
 
 ggplot() + 
   geom_smooth(data = dat[[2]], aes(x = dur, y = mean), method = "lm", formula = y ~ splines::bs(x, 3), se = F, color = 'darkblue') + 
   geom_ribbon(data = dat[[2]], aes(x = dur, ymin = low, ymax = high), fill = 'grey', alpha = 0.4) + 
   geom_ribbon(data = dat[[2]], aes(x = dur, ymin = lowlow, ymax = highhigh), fill = 'grey', alpha = 0.2) + 
-  geom_point(data = dat[[1]], aes(x = dur, y = actual, size = sample_size, color = study_id), alpha = 0.5) + 
+  #geom_point(data = dat[[1]], aes(x = dur, y = pred, size = sample_size, color = study_id), alpha = 0.5) + 
+  geom_point(data = dat[[1]], aes(x = dur, y = y, size = sample_size, color = study_id), alpha = 0.5) + 
   labs(x = 'Mean recorded antibiotic duration in each trial arm (days)', 
        y = 'Probability of resistant\nGram-negative bacteria colonisation') +
   # annotate('text', label = paste0('Increase in risk of acquiring resistance\ncarriage with one additional day of\nantibiotic is ', 
@@ -158,24 +159,15 @@ ggsave('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graph
 ############################################
 #########SENSITIVITY ANALYSIS ##############
 ############################################
-dat = get_metajags_plotdata(saved_jagsoutput = 'runs/randsens_0212nod_2021-10-13.Rdata', days = days)
+dat = get_metajags_plotdata(saved_jagsoutput = 'runs/randnodsens_0313_2021-11-02.Rdata', days = days)
+mean = (dat[[3]][1])
+low = (dat[[3]][2]) 
+high = (dat[[3]][3]) 
+message(paste0('The odds ratio for being colonised with resistant bacteria per additional day of antibiotic treatment is ', mean, '(', low, ' to ', high, ').'))
 
-ggplot() + 
-  geom_smooth(data = dat[[2]], aes(x = dur, y = mean), method = "lm", formula = y ~ splines::bs(x, 3), se = F, color = 'darkblue') + 
-  geom_ribbon(data = dat[[2]], aes(x = dur, ymin = low, ymax = high), fill = 'grey', alpha = 0.4) + 
-  geom_ribbon(data = dat[[2]], aes(x = dur, ymin = lowlow, ymax = highhigh), fill = 'grey', alpha = 0.2) + 
-  geom_point(data = dat[[1]], aes(x = dur, y = y, size = sample_size, color = study_id), alpha = 0.5) + 
-  labs(x = 'Mean recorded antibiotic duration in each trial arm (days)', 
-       y = 'Probability of resistant\nGram-negative bacteria colonisation') +
-  # annotate('text', label = paste0('Increase in risk of acquiring resistance\ncarriage with one additional day of\nantibiotic is ', 
-  #                                 mean, '% (80%CrI ', low, ' to ', high, '%)'), hjust = 0, x = 6.5, y = 0.1, size = 5) + 
-  #scale_y_continuous(limits = c(0 , 1), breaks = seq(0, 1, 0.1)) +
-  #scale_x_continuous(limits = c(0 , days), breaks = seq(0, days, by = 2)) +
-  scale_color_discrete(name = 'Study PMID') +
-  scale_size_continuous(name = 'Number of participants') +
-  theme_minimal() + 
-  guides(colour = guide_legend(nrow = 2)) +
-  theme(legend.position = 'bottom', 
-        legend.box = "vertical",
-        text = element_text(size = 18))
+dat = get_metajags_plotdata(saved_jagsoutput = 'runs/randnod_0717_2021-11-02.Rdata', days = days)
+mean = (dat[[3]][1])
+low = (dat[[3]][2]) 
+high = (dat[[3]][3]) 
+message(paste0('The odds ratio for being colonised with resistant bacteria per additional day of antibiotic treatment is ', mean, '(', low, ' to ', high, ').'))
 

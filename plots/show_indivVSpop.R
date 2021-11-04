@@ -11,7 +11,6 @@ library(ggplot2)
 library(ggpubr)
 library(reshape)
 
-
 source('models/get_output_indivVSpop_populationgrowth.R')
 
 # K = exp(20)
@@ -26,34 +25,34 @@ prop_R = 0.25
 # abx.s = 0.7
 # abx.r = 0.7
 # max.los = 14
-max.dur = 20
+max.dur = 21
 
-out = run_indivVSpop_populationgrowth(K = exp(20), 
+out = run_indivVSpop_populationgrowth(K = exp(20),
                                       max.los = 14,
-                                      #no antibiotic prescribed after admission 
-                                      cum.r.1 = 99999999, 
-                                      p.r.day1 = 1, 
-                                      p.r.after = 1,#does not matter
-                                      total_prop = 0.5, 
-                                      p.infect = 0.5, 
-                                      prop_R =  prop_R, 
+                                      #no antibiotic prescribed after admission
+                                      p.infect.after = 0.00001,
+                                      p.r.day1 = 1,
+                                      p.r.after = 0.5, #does not matter
+                                      total_prop = 0.5,
+                                      p.infect = 0.5,
+                                      prop_R =  prop_R,
                                       pi_ssr = 0.7,
-                                      r_trans = 0.7, 
+                                      r_trans = 0.7,
                                       fitness.r = 1,
-                                      r_thres = 0.01, 
+                                      r_thres = 0.01,
                                       s_growth = 0.5,
-                                      abx.s = 0.5, 
-                                      abx.r = 0.5, 
-                                      iterations = 20, 
+                                      abx.s = 0.5,
+                                      abx.r = 0.5,
+                                      iterations = 20,
                                       max.dur = max.dur)
 
-saveRDS(out, file = 'runs/indivVSpop.RDS')
+#saveRDS(out, file = 'runs/indivVSpop.RDS')
+
+#out = readRDS('runs/indivVSpop.RDS')
 
 ## within host 
 eff.lab = 'Administered antibiotics\nactive against susceptible\nand resistant organisms'
 ineff.lab = 'Administered antibiotics\nactive only against\nsusceptible organisms'
-
-out = readRDS('runs/indivVSpop.RDS')
 dw = out$withinhost
 dw$abx<- factor(dw$abx, levels = c("eff", "ineff"),
                 labels = c(eff.lab,
@@ -86,18 +85,18 @@ dp$abx<- factor(dp$abx, levels = c("Effective antibiotic available", "Effective 
                            ineff.lab))
 dp$variable = factor(dp$variable, levels = rev(levels(dp$variable)))
 
-line.dat = data.frame(y = c( prop_R,  prop_R), x = c(0.5, max.dur), variable = c('Transmitted'))
-r.ineff = sum(dp$value[which(dp$abx == ineff.lab & dp$Day == max.dur & dp$variable != 'Non-carrier')]/50)
-r.eff = sum(dp$value[which(dp$abx ==  eff.lab & dp$Day == max.dur & dp$variable != 'Non-carrier')]/50)
+line.dat = data.frame(y = c( prop_R,  prop_R), x = c(0.5, max.dur-1), variable = c('Transmitted'))
+r.ineff = sum(dp$value[which(dp$abx == ineff.lab & dp$Day == (max.dur-1) & dp$variable != 'Non-carrier')]/50)
+r.eff = sum(dp$value[which(dp$abx ==  eff.lab & dp$Day == (max.dur-1) & dp$variable != 'Non-carrier')]/50)
 arrow.dat = data.frame(y = c(0, r.eff , r.eff , 1, 0, r.ineff, 1, r.ineff ),
                        yend = c(r.eff , 0, 1, r.eff , r.ineff, 0, r.ineff, 1),
-                       x = rep(max.dur+1, 8),
-                       xend = rep(max.dur+1, 8), 
+                       x = rep(max.dur, 8),
+                       xend = rep(max.dur, 8), 
                        variable = c('Transmitted'), 
                        abx = c(rep(ineff.lab, 4), 
                                rep(eff.lab, 4)))
 lab.dat = data.frame(y = c(0.6, 0.1, 0.65, 0.155),
-                     x = c(max.dur+2.5, max.dur+2.5, max.dur+2.5, max.dur+2.5),
+                     x = c(max.dur+1.5, max.dur+1.5, max.dur+1.5, max.dur+1.5),
                      variable = c('Transmitted'), 
                      abx = c(rep(ineff.lab, 2), 
                              rep(eff.lab, 2)),
@@ -134,7 +133,7 @@ p = ggplot(dp, aes(x = Day, fill = variable, y = value)) +
   
 
 ggarrange(w, p, ncol = 2)  
-ggsave('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/final_main/indivVSpop.png', 
+ggsave('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/final_main/indivVSpop.png',
        width = 14,
        height = 10)
 

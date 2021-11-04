@@ -1,103 +1,104 @@
 # generate a table of number of days we want to observe (rows) -
 # against number of beds in the ward (columns), filled in with patient id numbers
-# accommodating for increase in length of stay with hospital acquired infections
 
 # the following function generates los and abx matrices when duration of antibiotics are varied, 
 # number of courses of antibiotics between long and short roughly similar 
 
-# differences with los_abx_matrix_varycourse: 
-# 1. define p.r.after (instead of using abx.type ) - such that antibiotics prescribed after admission may vary 
-# 2. generates 1 abx matrix only -since los will differ in both arms
-
-load("models/norm_ecdf.Rdata")
+fill.abx.adm <- function(abx.type, meanDur, los){
+  if (meanDur < los) {
+    c(rep(abx.type, meanDur), rep(0, (los-meanDur)))
+  } else {
+    rep(abx.type, meanDur) # extend stay if duration exceeds los 
+  }
+}
 
 los_abx_table_varydur <- function(n.bed, n.day, max.los, 
-                                  p.infect, p.r.day1, p.r.after, cum.r.1, 
+                                  p.infect, p.r.day1, p.r.after, p.infect.after, 
                                   meanDur, timestep, sd = 1){
+  #define matrix structure 
+  #rows - number of beds 
+  #columns - days of observation 
+  #assume all bed-days are occupied 
+  n.bed = round(n.bed)
+  n.day = round(n.day)
+  max.beddays = n.bed * n.day
   
-  # maximum number of patients that can be admitted to the ward in n.day
-  # (maximum number of patients if everyone stays only for 1 day)
-  n.patient = ceiling(n.bed * n.day)
-  patient.id = 1:n.patient
+  ################
+  # generate length of stay for each patient
+  # (exponential distribution)
+  ################
+  all_los = ceiling(rexp(max.beddays, 1/max.los))
+  max.patient = min(which(cumsum(all_los) > max.beddays)) + n.day
+  all_los = all_los[1:max.patient]
   
-  # generate length of stay for each patient IF no hospital acquired infection 
-  # (truncated normal distribution)
-  all_los = ceiling(rexp(n.patient, 1/max.los))
-  all_los[all_los > (5 * max.los)] = ceiling(max.los)
+  ################
+  # generate antibiotic prescribing 
+  # daily probability `p.infect` and`p.infect.after`
+  ################
+  patient.id = 1:max.patient
+  adm.abx = lapply(all_los , function(x) {rep(0, x)})
   
-  ####################
-  # DETERMINE ABX COURSES 
+  ## on admission 
+  abx.adm.flip = rbinom(max.patient, 1, p.infect)
+  abx.adm.id = patient.id[abx.adm.flip == 1] 
+  abx.type = sample(c(2, 1), length(abx.adm.id), c(p.r.day1, (1 - p.r.day1)), replace = T) # p.r.day1 cannot be 0 
+  abx.adm.id1 = abx.adm.id[abx.type == 1] # who got abx 1 
+  abx.adm.id2 = abx.adm.id[abx.type == 2] # who got abx 2
   
-  # first decide if patients are on antibiotics on day 1 of admission 
-  #number of broad vs narrow spectrum antibiotics on day 1 of admission 
-  no.abx.r.day1 = round(n.patient * p.infect * p.r.day1) #number of broad spectrum spectrum antibiotics prescribed for community acquired infection 
-  no.abx.s.day1 = round(n.patient * p.infect) - no.abx.r.day1 #number of narrow spectrum antibiotics prescribed for community acquired infection 
-  #identify patient ids who were prescribed broad vs narrow antibiotics
-  id.abx.r.day1 = sample(patient.id, no.abx.r.day1) #id of patients prescribed broad spectrum antibiotics on day 1
-  id.abx.s.day1 = sample(patient.id[-id.abx.r.day1], no.abx.s.day1) #id of patients prescribed narrow spectrum antibiotics on day 1
+  adm.abx[abx.adm.id2] = lapply(adm.abx[abx.adm.id2], function(x){
+    fill.abx.adm(abx.type = 2, meanDur = meanDur, los = length(x))
+  }) # fill abx 2
   
-  # then decide if going to receive antibiotics after admission - risk of acquiring HAI increases with length of stay 
-  # (cumulative normal distribution)
-  # if prescribed antibiotics after admission then prolong admission to complete course 
-  prob.after = norm_ecdf((1/cum.r.1) * (1 : max(all_los))) # get the cumulative probability for each day
-  # norm_ecdf - imported normalized function
-  abx.dayafter = lapply(patient.id, function(id){
-    # if the patient will receive antibiotics after admission - 1 if will be prescribed antibiotics on the day during los 
-    abx.dayafter.binary = rbinom(all_los[id], 1, prob = prob.after[1:all_los[id]])
-    # start dates if given antibiotics
-    if (sum(abx.dayafter.binary) > 0) {which(abx.dayafter.binary == 1)} else { 0 }
-  })
-  id.abx.dayafter = patient.id[which(lengths(abx.dayafter) > 1)]
+  adm.abx[abx.adm.id1] = lapply(adm.abx[abx.adm.id1], function(x){
+    fill.abx.adm(abx.type = 1, meanDur = meanDur, los = length(x))
+  }) # fill abx 1
   
-  #allocate antibiotics for the patients upon and during admission
-  all_abx = lapply(patient.id, function(id){ # for each patient 
-    
-    # create empty vector with 0 with length same as length of stay
-    fill = rep(0, all_los[id])
-    
-    # fill antibiotics on admission
-    if (length(id.abx.s.day1) > 0 & id %in% id.abx.s.day1) { # if the patient is given narrow spectrum antibiotics on admission
-      # antibiotic duration randomly drawn from a truncated normal distribution
-      dur = round(rtnorm(1, mean = meanDur, lower = 1, sd = sd))
-      fill[1: dur] = 1
-    } else if (length(id.abx.r.day1) > 0 & id %in% id.abx.r.day1) {
-      # antibiotic duration randomly drawn from a truncated normal distribution
-      dur = round(rtnorm(1, mean = meanDur, lower = 1, sd = sd))
-      fill[1: dur] = 2
-    }
-    
-    # fill antibiotics after admission
-    if (length(id.abx.dayafter) > 0 & id %in% id.abx.dayafter) { # if the patient is given antibiotics after admission
-      
-      # how many courses and duration for each course 
-      courses.start = abx.dayafter[[id]][which(abx.dayafter[[id]] > 0)]
-      no.courses = length(courses.start)
-      dur = round(rtnorm(no.courses, mean = meanDur, lower = 1, sd = sd))
-      
-      # which antibiotics for which course 
-      no.r.courses = round(no.courses * p.r.after)
-      r.courses.start = sample(courses.start, no.r.courses)
-      
-      for (start in courses.start){
-        narrow.or.broad = ifelse(start %in% r.courses.start, 2, 1)
-        end = start + dur[which(start == courses.start)] - 1
-        fill[start : end] = narrow.or.broad 
+  all_los = lengths(adm.abx)
+  day1stay = c(1, cumsum(all_los) + 1)
+  day1stay = day1stay[-length(day1stay)]
+  
+  los.expand = lapply(patient.id, function(x) {
+    rep(x, all_los[x])}
+  )
+  
+  ## during admission 
+  abx.aft.flip = rbinom(sum(all_los), 1, p.infect.after)
+  abx.aft.flip[day1stay] = 0 # change day of admission back to 0
+  abx.aft.flip[abx.aft.flip > 0] = sample(c(2, 1), sum(abx.aft.flip), c(p.r.after, (1 - p.r.after)), replace = T)
+  aft.abx = split(abx.aft.flip, unlist(los.expand)) 
+  
+  aft.abx = lapply(aft.abx, function(x)
+    if (any(x > 0)){
+      infect.days = which(x > 0)
+      x.update = x 
+      for (day1 in infect.days) {
+        
+        lastday = (day1 + meanDur - 1)
+        x.update[day1 : lastday] = x[day1] # can be infected again while taking antibiotics
+        
+        #if (length(x) < lastday) break #if last day is beyond los, extend 
       }
-      
+      x.update
+    } else {
+      x
     }
-    
-    return(fill)
+  )
+  
+  ## fill adm.abx with 0 to the same los as aft.abx
+  adm.abx = lapply(patient.id, function(i){
+    length(adm.abx[[i]]) = length(aft.abx[[i]])
+    adm.abx[[i]][is.na(adm.abx[[i]])] = 0
+    return(adm.abx[[i]])
   })
   
-  ####################
-  #PUT ABX COURSES AND LOS INTO PATIENT and ABX MATRIX
-  #make up a matrix of number of days we want to observe (rows) -
-  #against number of beds in the ward (columns)
-  all_los = lengths(all_abx)#update length of stay incorporating abx.r
-  patient.matrix = abx.matrix = matrix(NA, nrow = n.day, ncol = n.bed)
+  #update los
+  all_los = lengths(adm.abx)
+  
+  ## make into matrix 
+  patient.matrix = matrix(NA, nrow = n.day, ncol = n.bed)
   idx = 1
   for(j in 1:n.bed){
-    
+
     sum_los = cumsum(all_los[idx:length(all_los)]) #cumulative stay of patients 
     
     #find last patient in the last row (last day of observation)
@@ -106,13 +107,29 @@ los_abx_table_varydur <- function(n.bed, n.day, max.los,
     if (end.pt.id > length(all_los)) {end.pt.id = length(all_los)}
     #fill matrix
     patient.matrix[, j] = rep(idx:end.pt.id, all_los[idx: end.pt.id])[1:n.day]
-    abx.matrix[,j] = unlist(all_abx[idx:end.pt.id])[1:n.day]
     
     idx = end.pt.id + 1
   }
   
-  patient.matrix = patient.matrix[rep(1:n.day, each = timestep), ]
-  abx.matrix = abx.matrix[rep(1:n.day, each = timestep), ]
+  patient.id = 1:max(patient.matrix)
+  los.expand = split(patient.matrix, unlist(patient.matrix))
+  
+  adm.abx = lapply(patient.id, function(i){
+    length(adm.abx[[i]]) = length(los.expand[[i]])
+    return(adm.abx[[i]])
+  })
+  aft.abx = lapply(patient.id, function(i){
+    length(aft.abx[[i]]) = length(los.expand[[i]])
+    return(aft.abx[[i]])
+  })
+  adm.abx = matrix(unlist(adm.abx), nrow = n.day, ncol = n.bed)
+  aft.abx = matrix(unlist(aft.abx), nrow = n.day, ncol = n.bed)
+  abx.matrix = pmax(adm.abx, aft.abx) # broad spectrum abx takes priority
+  
+  ################
+  # find out if the patient was given antibiotics prior 
+  # for 'treated individual outcome
+  ################
   
   abx.b4 = split(abx.matrix, patient.matrix)
   abx.b4.fill = lapply(abx.b4, function(x){ 

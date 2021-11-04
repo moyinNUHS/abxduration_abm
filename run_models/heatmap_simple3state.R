@@ -41,7 +41,7 @@ for (abx.r.val in c(0, 0.5)){
         abx.s = rep(0.5, N^2),     # abx.s = amount of s killed by broad spectrum abx s
         abx.r = rep(abx.r.val, N^2),         # abx.r = amount of r killed by broad spectrum abx r
         p.infect = rep(0.5, N^2),     # "p.infect", probability of being prescribed antibiotics
-        cum.r.1 = rep(150, N^2),    # admission day when cummulative prabability of HAI requiring abx.r is 1
+        p.infect.after = rep(0.07, N^2),    # admission day when cummulative prabability of HAI requiring abx.r is 1
         p.r.day1 = rep(0.5, N^2),    # probability of being prescribed broad spectrum antibiotic on admission 
         p.r.after = rep(0.5, N^2),    # probability of being prescribed broad spectrum antibiotic after admission 
         short_dur = rep(3, N^2), 
@@ -68,7 +68,7 @@ for (abx.r.val in c(0, 0.5)){
                                                  prop_R= x['prop_R'], prop_S = x['prop_S'], 
                                                  bif = x['bif'], pi_ssr = x['pi_ssr'], repop.s = x['repop.s'], mu = x['mu'], 
                                                  abx.s = x['abx.s'], abx.r = x['abx.r'],
-                                                 p.infect = x['p.infect'], cum.r.1 = x['cum.r.1'], 
+                                                 p.infect = x['p.infect'], p.infect.after = x['p.infect.after'], 
                                                  p.r.day1 = x['p.r.day1'], p.r.after = x['p.r.after'], 
                                                  short_dur = x['short_dur'], long_dur = x['long_dur'], 
                                                  iterations = x['iterations'])

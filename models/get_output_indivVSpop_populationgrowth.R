@@ -8,13 +8,14 @@ source('models/model_populationgrowth.R')
 
 amtperday.count <- function(df, capacity, abx.matrix, patient.matrix, max.dur){
   
+  record = which(abx.matrix > 0)
   ## find who received abx (do not have to consider burn in)
-  abx.pst = patient.matrix[which(abx.matrix > 0)]
+  abx.pst = patient.matrix[record]
   
   amtperday.no = exp(df)/exp(capacity)
-  amtperday.treated = amtperday.no[which(abx.matrix > 0)]
+  amtperday.treated = amtperday.no[record]
   amtperday.treated.split = split(amtperday.treated, abx.pst)
-  amtperday.treated.split.filled = lapply(amtperday.treated.split, `length<-`, max.dur)
+  amtperday.treated.split.filled = lapply(amtperday.treated.split, `length<-`, max.dur + 1)
   
   amtperday.treated.matrix = do.call('cbind', amtperday.treated.split.filled)
   
@@ -24,7 +25,7 @@ amtperday.count <- function(df, capacity, abx.matrix, patient.matrix, max.dur){
 run_indivVSpop_populationgrowth <- function(p.infect, max.los, 
                                             K, total_prop, prop_R, pi_ssr, 
                                             r_trans, fitness.r,
-                                            cum.r.1, p.r.day1, p.r.after,
+                                            p.infect.after, p.r.day1, p.r.after,
                                             r_thres, s_growth, 
                                             abx.s, abx.r, iterations, max.dur){
   
@@ -35,10 +36,10 @@ run_indivVSpop_populationgrowth <- function(p.infect, max.los,
   
   # empty matrix to store output - each row is a day, each col is a iteration 
   # store within host output - exact number of bacteria per day with each additional day of abx treatment 
-  amtperday = list(eff = list(s = matrix(NA, nrow = max.dur, ncol = iterations),
-                              r = matrix(NA, nrow = max.dur, ncol = iterations)), 
-                   ineff = list(s = matrix(NA, nrow = max.dur, ncol = iterations),
-                                r = matrix(NA, nrow = max.dur, ncol = iterations)))
+  amtperday = list(eff = list(s = matrix(NA, nrow = max.dur+1, ncol = iterations),
+                              r = matrix(NA, nrow = max.dur+1, ncol = iterations)), 
+                   ineff = list(s = matrix(NA, nrow = max.dur+1, ncol = iterations),
+                                r = matrix(NA, nrow = max.dur+1, ncol = iterations)))
   # store population output - number of R from within host selection and transmission with varying duration of abx applied to the ward 
   Rtype_iter = list(eff = array(NA, dim = c((n.day-burn.in), 4, iterations)), 
                     ineff = array(NA, dim = c((n.day-burn.in), 4, iterations)))
@@ -46,7 +47,7 @@ run_indivVSpop_populationgrowth <- function(p.infect, max.los,
                    ineff = array(NA, dim = c((n.day-burn.in), 4, max.dur)))
   
   
-  for (dur in 1:max.dur){ # for each duration
+  for (dur in 0:max.dur){ # for each duration
     
     for(iter in 1:iterations){ # for each iteration 
       
@@ -54,7 +55,7 @@ run_indivVSpop_populationgrowth <- function(p.infect, max.los,
       # get matrix of length of stay, abx prescribed, patients admitted
       matrixes = los_abx_table_varydur(n.bed=n.bed, n.day=n.day, max.los=max.los, 
                                        p.infect = p.infect, p.r.day1 = p.r.day1, p.r.after = p.r.after, 
-                                       cum.r.1 = cum.r.1,  
+                                       p.infect.after = p.infect.after,  
                                        meanDur = dur, timestep=timestep)
       patient.matrix = matrixes[[1]]
       abx.matrix = matrixes[[2]]
@@ -88,7 +89,7 @@ run_indivVSpop_populationgrowth <- function(p.infect, max.los,
         
         if (dur == max.dur) {
           ##### WITHIN HOST
-        
+          
           # get vector of exact number of bacteria over `n.day` of abx treatment averaged over all treated patients
           amtperday[[type]][['s']][,iter] = amtperday.count(df.S, capacity = capacity, abx.matrix = abx.matrix, patient.matrix = patient.matrix, max.dur = max.dur) 
           amtperday[[type]][['r']][,iter] = amtperday.count(df.R, capacity = capacity, abx.matrix = abx.matrix, patient.matrix = patient.matrix, max.dur = max.dur)
@@ -167,7 +168,7 @@ run_indivVSpop_populationgrowth <- function(p.infect, max.los,
   amtperday$ineff$r = rowMeans(amtperday$ineff$r)
   
   amtperday.wide = do.call('cbind.data.frame', amtperday)
-  amtperday.wide$day = 1:max.dur
+  amtperday.wide$day = 0:max.dur
   amtperday.long = reshape2::melt(amtperday.wide, id.var = 'day')
   amtperday.long$abx = gsub("\\..*","",amtperday.long$variable)
   amtperday.long$res = gsub("*..","",amtperday.long$variable)
@@ -175,14 +176,14 @@ run_indivVSpop_populationgrowth <- function(p.infect, max.los,
   #### POPULATION
   Rtype.eff.mean = t(apply(Rtype_dur$eff, c(2,3), mean, na.rm = T)) #mean across each ward in each observational period
   Rtype.eff.mean = as.data.frame(Rtype.eff.mean)
-  Rtype.eff.mean$day = 1:max.dur
+  Rtype.eff.mean$day = 0: (max.dur -1)
   colnames(Rtype.eff.mean) = c('Admitted as R', 'Transmitted', 'Selection', 'Non-carrier', 'Day')
   Rtype.eff = reshape2::melt(Rtype.eff.mean, id.var = 'Day')
   Rtype.eff$abx = 'Effective antibiotic available'
   
   Rtype.ineff.mean = t(apply(Rtype_dur$ineff, c(2,3), mean, na.rm = T))
   Rtype.ineff.mean = as.data.frame(Rtype.ineff.mean)
-  Rtype.ineff.mean$day = 1:max.dur
+  Rtype.ineff.mean$day = 0: (max.dur -1)
   colnames(Rtype.ineff.mean) = c('Admitted as R', 'Transmitted', 'Selection', 'Non-carrier', 'Day')
   Rtype.ineff = reshape2::melt(Rtype.ineff.mean, id.var = 'Day')
   Rtype.ineff$abx = 'Effective antibiotic not available'

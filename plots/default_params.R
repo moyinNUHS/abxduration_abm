@@ -9,7 +9,7 @@ common.para = list(n.bed = 20,       # n.bed= number of beds in the ward
                    long_dur = 15,
                    prop_R = 0.4,     # Probability of being colonized with resistant strain on admission
                    pi_ssr = 0.03,    # pi_ssr= probability of R transmitting 
-                   cum.r.1 = 100, 
+                   p.infect.after= 0.1, 
                    p.infect = 0.5,   # p=probability of receiving antibiotic
                    p.r.day1 = 0.5, 
                    p.r.after = 0.5,

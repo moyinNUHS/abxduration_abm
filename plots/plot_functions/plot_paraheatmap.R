@@ -7,17 +7,8 @@ getposition <- function(lhs.filename, labs = labs.df, outcome.type){
   
   d = get(load(lhs.filename))  
   
-  if(length(grep('treated', lhs.filename)) == 0) { # get res.names
-    source('models/get_output_absdiff_simple3state.R')
-    
-    if(length(d$prcc) == 6) {
-      res.names = res.names[-grep('treated', res.names)]
-    }
-    
-  } else {
-    source('models/get_output_treated_simple3state.R')
-  }
-  
+  source('models/get_output_absdiff_simple3state.R')
+
   
   outcome.type.label = which(res.names == outcome.type)
   
@@ -121,9 +112,10 @@ plot_paraheatmap <- function (plot.df) {
     scale_fill_gradientn(colours = c("#388697",'#F0F0F0',"#EB5160"),
                          na.value = "white", 
                          breaks=c(min(plot.df$value, na.rm = T), 0.5, max(plot.df$value, na.rm = T)),
-                         labels=c('Higher value correlated with smaller\ndifferences in resistant carriers\nbetween the long and short duration ward',
+                         labels=c('Decreases difference\nbetween the wards',
                                   '\nNo effect\n', 
-                                  'Higher value correlated with larger\ndifferences in resistant carriers\nbetween the long and short duration ward')) +
+                                  'Increase difference\nbetween the wards'), 
+                         name = 'Effect of increasing parameter values on proportion of\nresistance carriers in long ward relative to short ward') +
     theme_minimal(base_size = base_size) + 
     labs(x = "", y = "", fill = "") + 
     scale_y_discrete(expand = c(0, 0),
@@ -135,7 +127,6 @@ plot_paraheatmap <- function (plot.df) {
     scale_x_discrete(labels = c('', '', '', rep(c('Exclusive colonisation', 'Co-colonisation ', 'Within-host growth'), 6))) +
     theme(legend.position ='bottom', 
           legend.justification = c(0.6, 1),
-          legend.key.height = unit(2,'cm'),
           axis.ticks = element_blank(), 
           panel.grid.major = element_blank(), 
           panel.grid.minor = element_blank(),
@@ -149,27 +140,28 @@ plot_paraheatmap <- function (plot.df) {
                        'Growth rate of R', 'Growth rate of S', 
                        'Carrying capacity', '% Capacity occupied by GNB\non admission', 
                        '% R carriers on admission', 
-                       '% Broad-spectrum AB prescribed\nduring admission*', 'Time to repeated AB prescription\nduring admission',
+                       '% Broad-spectrum AB prescribed\nduring admission*', 'Daily % of prescribing AB\nduring admission',
                        '% Broad-spectrum AB prescribed\nat admission*', '% Prescribed AB at admission*'), 
              colour ='grey40', size = 3.2) +
-    guides(fill = guide_colorbar(nbin = 200, raster = F)) +
+    guides(fill = guide_colorbar(nbin = 200, raster = F, title.position="top",title.hjust = 0.5)) +
     geom_hline(yintercept=c(4.5, 6.5, 9.5, 12.5), color='grey20', size=0.5)+
     geom_vline(xintercept = c(1.5, 7.5, 13.5, 19.5)+2,  color = "black", size=0.75) + 
     geom_vline(xintercept = c(4.5, 10.5, 16.5)+2,  color = "grey", size=0.75) + 
     theme(plot.margin = unit(c(4, 2, 0, 0), "cm"), 
-          text = element_text(size = 18), 
+          text = element_text(size = 15), 
           legend.key.height = unit(0.75, "cm"),
-          legend.key.width = unit(4, "cm"))
+          legend.key.width = unit(4, "cm"),
+          legend.margin = ggplot2::margin(t = -1, unit='cm'))
   
-  outcomes = c('Resistance carriers amongst the\ntreated patients\n(Individual effect)',
-               'Resistance carriers in the ward\n(Population effect)\n', 
+  outcomes = c('Resistance carriers amongst\ntreated patients\n(Individual effect)',
+               'Resistance carriers in overall\nward population\n(Population effect)', 
                'Non-resistance carriers acquiring\nresistance carriage during admission\n(Population effect)')
   
   for (i in 1:length(outcomes))  {
     p = p + annotation_custom(
       grob = grid::textGrob(label = outcomes[i], hjust = 0.5, gp = gpar(cex = 1.2, fontface="bold")),
-      ymin = 19.25,                   # Vertical position of the textGrob
-      ymax = 20.25,
+      ymin = 19.4,                   # Vertical position of the textGrob
+      ymax = 20.4,
       xmin = c(6, 12, 18)[i],         # Note: The grobs are positioned outside the plot area
       xmax = c(7, 13, 19)[i])
   }
@@ -183,7 +175,7 @@ plot_paraheatmap <- function (plot.df) {
   for (i in 1:length(abxr.outcomes))  {
     p = p + annotation_custom(
       grob = grid::textGrob(label = abxr.outcomes[i], hjust = 0.5, gp = gpar(cex = 0.85)),
-      ymin = 16.6,      # Vertical position of the textGrob
+      ymin = 16.6,        # Vertical position of the textGrob
       ymax = 18.6,
       xmin = x[i],         # Note: The grobs are positioned outside the plot area
       xmax = (x+2)[i] )

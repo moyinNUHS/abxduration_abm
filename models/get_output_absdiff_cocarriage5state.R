@@ -8,7 +8,7 @@ get_output_summarystats_cocarriage <- function(n.bed, max.los, n.day,
                                                prop_R, prop_r, prop_Sr, prop_S,
                                                bif, pi_ssr, repop.s, fitness.r, 
                                                mu, abx.s, abx.r, dur.type,
-                                               p.infect, cum.r.1, p.r.day1, p.r.after,
+                                               p.infect, p.infect.after, p.r.day1, p.r.after,
                                                timestep, burn_in, iterations,
                                                meanDur){
   
@@ -23,7 +23,7 @@ get_output_summarystats_cocarriage <- function(n.bed, max.los, n.day,
     # get matrix of length of stay, abx prescribed, patients admitted
     matrixes = los_abx_table_varydur(n.bed=n.bed, n.day=n.day, max.los=max.los, 
                                      p.infect=p.infect, p.r.day1=p.r.day1, p.r.after = p.r.after, 
-                                     cum.r.1=cum.r.1, 
+                                     p.infect.after=p.infect.after, 
                                      meanDur = meanDur, timestep=timestep)
     patient.matrix = matrixes[[1]]
     abx.matrix = matrixes[[2]]
@@ -85,7 +85,7 @@ run_absdiff_cocarriage5state <- function(n.bed, max.los,
                                          prop_R, prop_r, prop_Sr, prop_S,
                                          bif, pi_ssr, repop.s, fitness.r,
                                          mu, abx.s, abx.r, 
-                                         p.infect, cum.r.1, p.r.day1, p.r.after,
+                                         p.infect, p.infect.after, p.r.day1, p.r.after,
                                          short_dur, long_dur){
   
   message('cocarriage 5 state model initiating...')
@@ -100,7 +100,7 @@ run_absdiff_cocarriage5state <- function(n.bed, max.los,
   
   short_output = get_output_summarystats_cocarriage(n.bed = n.bed, n.day = n.day, max.los = max.los, 
                                                     p.infect = p.infect, p.r.day1 = p.r.day1, p.r.after = p.r.after, 
-                                                    cum.r.1 = cum.r.1, 
+                                                    p.infect.after = p.infect.after, 
                                                     meanDur = short_dur, dur.type = 'short',
                                                     prop_R = prop_R, prop_r = prop_r, prop_Sr = prop_Sr, prop_S = prop_S, 
                                                     pi_ssr = pi_ssr, bif = bif, mu = mu, fitness.r = fitness.r,
@@ -111,7 +111,7 @@ run_absdiff_cocarriage5state <- function(n.bed, max.los,
   #### LONG DURATION 
   long_output = get_output_summarystats_cocarriage(n.bed = n.bed, n.day = n.day, max.los = max.los, 
                                                    p.infect = p.infect, p.r.day1 = p.r.day1, p.r.after = p.r.after, 
-                                                   cum.r.1 = cum.r.1, 
+                                                   p.infect.after = p.infect.after, 
                                                    meanDur = long_dur, dur.type = 'long',
                                                    prop_R = prop_R, prop_r = prop_r, prop_Sr = prop_Sr, prop_S = prop_S, 
                                                    pi_ssr = pi_ssr, bif = bif, mu = mu, fitness.r = fitness.r,

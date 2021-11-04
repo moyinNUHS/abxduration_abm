@@ -44,4 +44,4 @@ rsconnect/
 /archive
 
 #AA_test
-/AA_tests/AA_runs/*.csv
+/AA_tests/AA_runs/

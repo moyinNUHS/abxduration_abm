@@ -9,7 +9,6 @@ rm(list = ls()) # Clean working environment
 
 # load libraries 
 require(pse)         #load pse package for Latin Hypercube
-require(sensitivity) #load sensitivity package for sensitivity analysis 
 require(parallel)    #load parallel processing package to use multiple cores on computer (or cluster)
 
 ############################################ Define parameters  ##############################################
@@ -29,7 +28,7 @@ colnames(samples.p) = c('meanDur', 'prop_R',  'pi_ssr')
 ############################################ Run ABS DIFF models  #############################################
 
 # record errors to debug 
-cl <- makeCluster(detectCores(), outfile = paste0('error_files/parallel_error_cocarriage5state_', Sys.Date(), '.txt'))
+cl <- makeCluster(detectCores())
 
 # source functions on all cores
 clusterCall(cl, function() {source('models/get_output_abs_cocarriage5state.R')})
@@ -59,7 +58,7 @@ for (p in c('pi_ssr', 'prop_R')){ #parameter to vary
         abx.s = rep(0.5, N^2),     # abx.s = amount of s killed by broad spectrum abx s
         abx.r = rep(0, N^2),         # abx.r = amount of r killed by broad spectrum abx r
         p.infect = rep(0.5, N^2),     # "p.infect", probability of being prescribed antibiotics
-        cum.r.1 = rep(150, N^2),    # admission day when cummulative prabability of HAI requiring abx.r is 1
+        p.infect.after = rep(0.02, N^2),    # admission day when cummulative prabability of HAI requiring abx.r is 1
         p.r.day1 = rep(0.5, N^2),    # probability of being prescribed broad spectrum antibiotic on admission 
         p.r.after = rep(0.5, N^2),    # probability of being prescribed broad spectrum antibiotic after admission 
         meanDur = samples[['meanDur']], 
@@ -83,7 +82,7 @@ for (p in c('pi_ssr', 'prop_R')){ #parameter to vary
                                                  prop_R= x['prop_R'], prop_r = x['prop_r'], prop_Sr = x['prop_Sr'], prop_S = x['prop_S'], 
                                                  bif = x['bif'], pi_ssr = x['pi_ssr'], repop.s = x['repop.s'], fitness.r = x['fitness.r'], mu = x['mu'], 
                                                  abx.s = x['abx.s'], abx.r = x['abx.r'],
-                                                 p.infect = x['p.infect'], cum.r.1 = x['cum.r.1'], 
+                                                 p.infect = x['p.infect'], p.infect.after = x['p.infect.after'], 
                                                  p.r.day1 = x['p.r.day1'], p.r.after = x['p.r.after'], 
                                                  meanDur = x['meanDur'],
                                                  iterations = x['iterations'])

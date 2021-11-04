@@ -6,7 +6,7 @@
 rm(list = ls()) # clean working environment
 
 library(parallel)
-cl <- makeCluster(5, outfile = paste0('error_files/parallel_error_populationgrowth_withinhost', Sys.time(), '.txt'))
+cl <- makeCluster(8, outfile = paste0('error_files/parallel_error_populationgrowth_withinhost', Sys.time(), '.txt'))
 
 ################################### Dependencies and functions ################################################
 source('models/get_output_trialdata_withinhost_populationgrowth.R')

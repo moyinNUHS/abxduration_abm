@@ -14,23 +14,23 @@ library(ggpubr)
 source('plots/plot_functions/plot_scatter.R')
 
 # get plots
-p = scatter(get(load('runs/simple3state_420_notzero_2021-05-22.Rdata')))
+p = scatter(get(load('runs/simple3state_500_notzero_2021-10-30.Rdata')))
 png(file = '~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/simple3state_scatter.png', 
     res = 400,
     width = 7, height = 7, units = 'in')
 p
 dev.off()
 
-p = scatter(get(load('runs/cocarriage5state_420_notzero_2021-05-23.Rdata')))
+p = scatter(get(load('runs/cocarriage5state_500_notzero_2021-10-31.Rdata')))
 png(file = '~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/cocarriage5state_scatter.png', 
     res = 400,
     width = 7, height = 7, units = 'in')
 p
 dev.off()
 
-p = scatter(get(load('runs/populationgrowth_400_notzero_2021-05-24.Rdata'))) 
+p = scatter(get(load('runs/populationgrowth_500_notzero_2021-10-31.Rdata'))) 
 png(file = '~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/populationgrowth_scatter.png', 
     res = 400,
-    width = 7, height = 7, units = 'in')
+    width = 7, height = 8, units = 'in')
 p
 dev.off()

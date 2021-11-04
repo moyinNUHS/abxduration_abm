@@ -26,8 +26,8 @@ eff.lab = 'Antibiotic active\nagainst susceptible\nand resistant organisms'
 ineff.lab = 'Antibiotic active\nonly against\nsusceptible organisms'
 
 # run use simple model 
-files = c('runs/simple3state_transheat_absdiffnotzero2021-10-26.Rdata', 
-          'runs/simple3state_transheat_absdiffzero2021-10-26.Rdata')
+files = c('runs/simple3state_transheat_absdiffnotzero2021-10-30.Rdata', 
+          'runs/simple3state_transheat_absdiffzero2021-10-30.Rdata')
 d = list()
 for (f in files){
   load(f)

@@ -12,7 +12,7 @@ library(ggpubr)
 library(reshape)
 
 # load output from model 
-load('runs/cocarriage5state_transheat_abs_2021-10-08.Rdata')
+load('runs/cocarriage5state_transheat_abs_2021-10-29.Rdata')
 d.wide = data.frame(t = unlist(dat['pi_ssr']),
                     i = unlist(dat['prop_R']),
                     d = unlist(dat['meanDur']), 

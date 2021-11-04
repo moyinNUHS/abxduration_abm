@@ -49,7 +49,7 @@ save(plot.data, file = paste0('runs/stability_plot_data', Sys.Date(), '.Rdata'))
 p = ggplot(plot.data, aes(x = x, y = value, colour = as.factor(iter))) +
   geom_line(size = 0.4, alpha = 0.4) +
   scale_color_manual(values = rep('grey50', (iterations))) +
-  labs(y = 'Difference in number of resistance carriers per day between\nthose receiving long vs short antibiotic treatment duration',
+  labs(y = 'Difference in proportion of resistance carriers between\nlong vs short antibiotic treatment duration wards',
        x = 'Days of observation')+
   geom_vline(xintercept = 150, linetype='dashed', size = 0.7, colour = 'red')+
   theme_minimal() +
