@@ -1,3 +1,5 @@
+[![License: CC0-1.0](https://licensebuttons.net/l/zero/1.0/88x31.png)](http://creativecommons.org/publicdomain/zero/1.0/) ![R](https://img.shields.io/badge/R-%23276DC3.svg?style=for-the-badge&logo=r&logoColor=white)
+
 This folder contains codes to implement and assess three increasingly complex stochastic agent based models to determine if shortening treatment duration is an effective strategy in reducing the prevalence of AMR, and under what conditions does shortening duration most effectively reduces AMR. 
 
 The three models are named: simple 3-state, co-carriage 5-state and population growth models.
