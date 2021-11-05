@@ -2,15 +2,24 @@
 
 This folder contains codes to implement and assess three increasingly complex stochastic agent based models to determine if shortening treatment duration is an effective strategy in reducing the prevalence of AMR, and under what conditions does shortening duration most effectively reduces AMR. 
 
-The three models are named: simple 3-state, co-carriage 5-state and population growth models.
+The three models are named: 
+
+- simple 3-state
+- co-carriage 5-state 
+- population growth model
 
 The codes are organised as below: 
 
 ## MODELS
-Contains codes for the models: `model_simple3state`, `model_cocarriage5state`, `model_populationgrowth`
-And related functions that are required to run the models 
+Contains codes for the models: 
 
-The types of output that can be calculated from each code file are labelled in the file names
+- `model_simple3state`
+- `model_cocarriage5state`
+- `model_populationgrowth`
+
+And related functions that are required to run the models.
+
+The types of output that can be calculated from each code file are labelled in the file names.
 
 
 ## RUN_MODELS
@@ -20,16 +29,14 @@ Include checks for agreement between runs to decide if sample size ie size of la
 
 
 ## RUNS
-Contains results of the runs from each model and scenario
+Contains results of the runs from each model and scenario.
 
 ## PLOTS
-Codes to generate plots in the manuscript
+Codes to generate plots in the manuscript.
 
-## AA TESTS
+## AA_TESTS
 Codes to run Vargha-Delaney A-Test to find the optimal number of iterations per simulation. 
 The test compares distributions of simulation outputs under identical parameter values, which is a non-parametric measure of the difference between the distributions of model outputs suggesting if the outputs are consistent.
 
 ## UNIT TESTS
-Contains code which tests each step of each model to ensure they give the expected outputs
-
-
+Contains code which tests each step of each model to ensure they give the expected outputs.
