@@ -81,7 +81,7 @@ run_prcc_cocarriage <- function(abx.r) {
     factors <- names(parameters)
     
     abxr.effectiveness = ifelse(parameters$abx.r$max < 0.01, 'zero', 'notzero')
-    N = 500
+    N = 600
     
     # Check order of variables - MAKE SURE the variable listing and ORDER MATCHES the variable listing input into run_model
     source('models/get_output_absdiff_cocarriage5state.R')

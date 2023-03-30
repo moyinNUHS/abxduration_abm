@@ -45,10 +45,10 @@ param.labels = c("n", "l",  #ward level
 #### Input run data required for plotting parameter heatmap 
 lhs.list = list('runs/simple3state_500_notzero_2021-10-30.Rdata',
                 'runs/cocarriage5state_500_notzero_2021-10-31.Rdata',
-                'runs/populationgrowth_500_notzero_2021-10-31.Rdata',
+                'runs/populationgrowth_600_notzero_2021-11-05.Rdata',
                 'runs/simple3state_500_zero_2021-10-30.Rdata',
                 'runs/cocarriage5state_500_zero_2021-10-31.Rdata',
-                'runs/populationgrowth_500_zero_2021-10-31.Rdata')
+                'runs/populationgrowth_450_zero_2021-10-30.Rdata')
 
 ### plot prcc for resistance carrier prevalence
 # get ranking positions of the parameters 

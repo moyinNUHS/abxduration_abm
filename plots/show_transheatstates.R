@@ -105,12 +105,12 @@ for (p in unique(d$p)){
 }
 
 transheatstates = ggarrange(plotlist=plots, nrow = 2, ncol = 5, widths = c(1.2, 1, 1, 1, 1) )
-transheatstates = annotate_figure(transheatstates, top = text_grob('A. Proportion of ward patients with given carriage status', 
-                                                     face = "bold", size = 15, hjust = 0.88))
+transheatstates = annotate_figure(transheatstates, top = text_grob('Proportion of ward patients with given carriage status', 
+                                                     face = "bold", size = 15))
 #transheatstates
 ggsave('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/final_main/transheatstate.png',  
        dpi = 500, 
-       width = 14, height = 5)
+       width = 14, height = 6)
 
 
 transheat = readRDS('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/final_main/transheat.rds')

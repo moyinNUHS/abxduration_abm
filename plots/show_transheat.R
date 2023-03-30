@@ -84,7 +84,7 @@ p = ggplot(dall, aes(x = t, y = i, fill = f)) +
             panel.background = element_blank()) 
 
 transheat = annotate_figure(p, 
-                            top = text_grob('B. Difference in proportion of resistance carriers between the long and short wards', 
+                            top = text_grob('Difference in proportion of resistance carriers between the long and short wards', 
                                             face = "bold", size = 15, hjust = 0.6))
 
 transheat

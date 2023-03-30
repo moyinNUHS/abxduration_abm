@@ -22,12 +22,11 @@ colo.table <- function(patient.matrix, los.array, total_prop, prop_R, r_thres, K
   
   number_of_patients = dim(los.array)[2]
   
-  #capacity for bacteria growth (log)
+  #capacity for enterobacteriaceae growth (log)
   #log of the capacity is normal in distribution from rene 
   #d=read.csv('gutdata/Ini_CTXm_copies_qPCR.csv')
   #hist(d$ini_16S_log)
-  total_capacity = rnorm(number_of_patients, mean = log(K)) #in log 
-  total_capacity[which(total_capacity < 0)] = log(K)
+  total_capacity = rnorm(number_of_patients, mean = K) #in log 
   total_capacity_matrix = matrix(rep(total_capacity, los.array[2,]), byrow = F, ncol = ncol(patient.matrix)) #in log 
   
   #existing population 
@@ -35,14 +34,14 @@ colo.table <- function(patient.matrix, los.array, total_prop, prop_R, r_thres, K
   #distribution of the total capacity so that some starts at full capacity while others are not 
   #which is similar to model 2 where there is sr 
   total_existing_mean = log(total_prop * exp(total_capacity)) #in log 
-  total_existing = rnorm(number_of_patients, mean = total_existing_mean) #total number of bacteria is a proportion of the capacity (log)
+  total_existing = rnorm(number_of_patients, mean = total_existing_mean) #total number of Enterobacteriaceae is a proportion of the capacity (log)
   total_existing [which(total_existing >= total_capacity)] = total_capacity [which(total_existing >= total_capacity)] #those exceeding total capacity will be given their own full capacity
   
   #amount of S and R carried 
   r_thres_log = log(r_thres * exp(total_existing)) # a proportion of the total gut capacity 
   r_thres_matrix = matrix(rep(r_thres_log, los.array[2,]), byrow = F, ncol = ncol(patient.matrix)) #in log 
   
-  morethan_rthres = which(total_existing > r_thres_log)  #pick patients who have existing bacteria more than r_thres (log) 
+  morethan_rthres = which(total_existing > r_thres_log)  #pick patients who have existing Enterobacteriaceae more than r_thres (log) 
   r.id = sample(morethan_rthres, size = floor(prop_R * number_of_patients)) 
   if (length(r.id) > 0) {s.id = (1:number_of_patients) [-r.id]} else {s.id = (1:number_of_patients)}
   
@@ -98,9 +97,8 @@ nextDay <- function(patient.matrix, los.array, abx.matrix, colo.matrix,
   
   S_table = exp(colo.matrix[[1]]) #in abs
   R_table = exp(colo.matrix[[2]]) #in abs
-  trans_matrix = matrix(F, nrow = nrow(S_table), ncol = ncol(S_table))
   
-  #capacity matrix for bacteria growth (abs)
+  #capacity matrix for enterobacteriaceae growth (abs)
   total_capacity = exp(colo.matrix[[3]]) 
   
   # r_thres (abs)
@@ -130,7 +128,7 @@ nextDay <- function(patient.matrix, los.array, abx.matrix, colo.matrix,
         # calculate effect of R logistic bacteria growth (abs) - only R growth if on antibiotics
         R_grow = r_growth * R_table[i-1, j] * (1 - ((R_table[i-1, j] + S_table[i-1, j])/total_capacity[i, j])) 
         # abx killing if abx.matrix is r abx (== 2) (abs)
-        R_abx = -(abx.matrix[i-1, j] == 2) * abx.r * (R_table[i-1, j] + R_grow)
+        R_abx = -(abx.matrix[i-1, j] == 2) * abx.r * R_table[i-1, j]
         # add effects to current table (abs first because log of a negative number is NaN)
         R_table[i, j] = R_table[i-1, j] + R_grow + R_abx
       } else {
@@ -140,9 +138,9 @@ nextDay <- function(patient.matrix, los.array, abx.matrix, colo.matrix,
       
       if(is.na(S_table[i, j])){ 
         # calculate effect of S logistic bacteria growth (in absolute numbers)
-        S_grow = s_growth * S_table[i-1, j] * (1 - ((S_table[i-1, j])/total_capacity[i, j])) 
+        S_grow = s_growth * S_table[i-1, j] * (1 - (S_table[i-1, j]/total_capacity[i, j])) # S may grow to max capacity
         # calculate killing effect of antibiotics R and antibiotics S (abs)
-        S_abx = -(abx.matrix[i-1, j] >= 1) * abx.s * (S_table[i-1, j] + S_grow)
+        S_abx = -(abx.matrix[i-1, j] >= 1) * abx.s * S_table[i-1, j]
         # apply effects (abs first because log of a negative number is NaN)
         S_table[i, j] = S_table[i-1, j] + S_grow + S_abx
       } else { 
@@ -157,27 +155,22 @@ nextDay <- function(patient.matrix, los.array, abx.matrix, colo.matrix,
       ### transmission only happens if R and S have not exceeded total capacity and S is not fully occupying the capacity
       if(S_table[i, j] + R_table[i, j] > total_capacity[i, j]){ ## if existing S and R already exceed total capacity (abs)
         
-        # if (S_table[i, j] > total_capacity[i, j]) { # S has a growing advantage if S alone exceeded capacity
-        #   S_table[i, j] = total_capacity[i, j]
-        #   R_table[i, j] = 0 
-        # } else {
-        #   S_table[i, j] = S_table[i, j]
-        #   R_table[i, j] = total_capacity[i, j] - S_table[i, j] 
-        # }
-        
-        S_table[i, j] =  S_table[i, j] / (S_table[i, j] + R_table[i, j]) * total_capacity[i, j]
-        R_table[i, j] =  R_table[i, j] / (S_table[i, j] + R_table[i, j]) * total_capacity[i, j]
-        
+        if (S_table[i, j] > total_capacity[i, j]) { # S has a growing advantage if S alone exceeded capacity
+          S_table[i, j] = total_capacity[i, j]
+          R_table[i, j] = 0 
+        } else {
+          S_table[i, j] = S_table[i, j]
+          R_table[i, j] = total_capacity[i, j] - S_table[i, j] 
+        }
+
         #natural attrition of S and R take place according to their density if capacity exceeded
+      
+      } else { #transmission if S and R less than total_capacity
         
-      } else {
-        
-        ### transmission if S and R less than total_capacity but with transmission exceeds total_capacity
         R_trans = r_trans * R_table[i-1, j] * (roll < prop_r) # abs 
-        if(R_trans > 0) {trans_matrix[i,j] = TRUE}
         
         if (S_table[i, j] + R_table[i, j] + R_trans > total_capacity[i, j]) {
-          
+          ### transmission if S and R less than total_capacity but with transmission exceeds total_capacity
           S_table[i, j] = S_table[i, j] / (S_table[i, j] + R_table[i, j] + R_trans) * total_capacity[i, j] #S and R+R_trans each given their proportion of the total capacity (abs)
           R_table[i, j] = (R_table[i, j] + R_trans) / (S_table[i, j] + R_table[i, j] + R_trans) * total_capacity[i, j]
           
@@ -185,7 +178,6 @@ nextDay <- function(patient.matrix, los.array, abx.matrix, colo.matrix,
           ### transmission if sum of S and R and transmitted R are less than the total capacity
           #transmission happens with full amount of R_trans
           R_table[i, j] = R_table[i, j] + R_trans 
-        
         }
       }
       
@@ -197,7 +189,7 @@ nextDay <- function(patient.matrix, los.array, abx.matrix, colo.matrix,
   S_table = log(S_table)
   R_table = log(R_table)
   
-  return(list(S_table, R_table, total_capacity, r_thres_matrix, trans_matrix))
+  return(list(S_table, R_table, total_capacity, r_thres_matrix))
 }
 
 

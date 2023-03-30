@@ -112,7 +112,7 @@ plot_paraheatmap <- function (plot.df) {
     scale_fill_gradientn(colours = c("#388697",'#F0F0F0',"#EB5160"),
                          na.value = "white", 
                          breaks=c(min(plot.df$value, na.rm = T), 0.5, max(plot.df$value, na.rm = T)),
-                         labels=c('Decreases difference\nbetween the wards',
+                         labels=c('Decrease difference\nbetween the wards',
                                   '\nNo effect\n', 
                                   'Increase difference\nbetween the wards'), 
                          name = 'Effect of increasing parameter values on proportion of\nresistance carriers in long ward relative to short ward') +
@@ -140,7 +140,7 @@ plot_paraheatmap <- function (plot.df) {
                        'Growth rate of R', 'Growth rate of S', 
                        'Carrying capacity', '% Capacity occupied by GNB\non admission', 
                        '% R carriers on admission', 
-                       '% Broad-spectrum AB prescribed\nduring admission*', 'Daily % of prescribing AB\nduring admission',
+                       '% Broad-spectrum AB prescribed\nduring admission*', 'Daily probability of being\nprescribed AB during admission',
                        '% Broad-spectrum AB prescribed\nat admission*', '% Prescribed AB at admission*'), 
              colour ='grey40', size = 3.2) +
     guides(fill = guide_colorbar(nbin = 200, raster = F, title.position="top",title.hjust = 0.5)) +

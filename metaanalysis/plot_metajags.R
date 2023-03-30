@@ -116,11 +116,10 @@ get_metajags_plotdata <- function(saved_jagsoutput, days = 10){
   
   return(list(plot.p, plot.pred, RR))
   
-  
 }
 
 days = 15
-dat = get_metajags_plotdata(saved_jagsoutput = 'runs/randnod_0717_2021-11-02.Rdata', days = days)
+dat = get_metajags_plotdata(saved_jagsoutput = 'runs/randnod_0313_2021-11-02.Rdata', days = days)
 
 mean = (dat[[3]][1])
 low = (dat[[3]][2]) 

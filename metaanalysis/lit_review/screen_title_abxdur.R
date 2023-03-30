@@ -2,7 +2,7 @@
 
 rm(list = ls())
 
-d = read.csv('lit_review/unique_entries_abxdur.csv')
+d = read.csv('lit_review/unique_entries_abxdur2022-10-04.csv')
 
 ## check major papers are present 
 # d$Title[grep('treatment for uncomplicated cellulitis', d$Title)] #Comparison of short-course (5 days) and standard (10 days) treatment for uncomplicated cellulitis
@@ -214,6 +214,6 @@ colnames(combine)[which(colnames(combine) == 'Title')] = 'title'
 final = combine[,c('relevent', 'dur_trial', 'reason_exclude','Comments', 'short_dur', 'long_dur', 'fu_period', 'PMID', 'title')]
 
 
-write.csv(final, 'lit_review/after_screen_title_withR_abxdur.csv')
+write.csv(d, 'lit_review/after_screen_title_withR_abxdur_oct2022.csv')
 
 

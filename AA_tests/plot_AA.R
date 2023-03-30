@@ -45,7 +45,7 @@ plot.data$abxr = as.factor(plot.data$abxr)
 plot.data$abxr = factor(plot.data$abxr, 
                         levels = c('3gcre', 'cre'), 
                         labels = c('Administered antibiotics active against\nboth susceptible and resistant organisms', 
-                                   'Administered antibiotics active against\nonly resistant organisms'))
+                                   'Administered antibiotics active against\nonly susceptible organisms'))
 
 plot = ggplot(plot.data, aes(x = samplesize, y = value, group = scenario, color = variable)) + 
   geom_line() + 

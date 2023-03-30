@@ -45,3 +45,9 @@ rsconnect/
 
 #AA_test
 /AA_tests/AA_runs/
+
+# Data files
+*.csv
+*.xlsx
+*.RDS
+

@@ -12,7 +12,7 @@ library(ggpubr)
 library(reshape)
 
 # load data 
-load('runs/populationgrowth_2021-10-26withinhost.Rdata')
+load('runs/populationgrowth_2021-11-05withinhost.Rdata')
 
 # clean data 
 low.s = dat[which(dat$s_growth < 0.25), c('day', 'S_short_perday', 'S_long_perday')]
@@ -100,7 +100,7 @@ ggplot(dat.long, aes(x = day, y = value, group = interaction(bact_type, growth_t
   scale_y_continuous(limits = c(0, 1)) +
   scale_x_continuous(limits = c(0, 30)) +
   scale_color_manual(name = '', 
-                     values = c('#D7816A', "#729B79"), 
+                     values = c('#801E47', "#215f83"), 
                      labels = c('Resistant bacteria', 'Susceptible bacteria')) +
   scale_linetype(name = '', labels = c('Fast bacterial growth', 'Slow bacterial growth')) +
   geom_segment(aes(x = dat.long$arrow.right.seg.x, xend = dat.long$arrow.right.seg.x.end, 
@@ -120,7 +120,7 @@ ggplot(dat.long, aes(x = day, y = value, group = interaction(bact_type, growth_t
         legend.text = element_text(size=12), 
         legend.key = element_blank()) 
 
-ggsave('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/final_main/withinhost.png',  
+ggsave('~/Documents/nBox/angelsfly/indiv_abxduration/manuscript/manuscript/graphs/fig5_withinhost.jpg',  
        dpi = 500, 
        width = 13, height = 8)
 

@@ -5,6 +5,7 @@ setwd('~/Documents/nBox/git_projects/abxduration_abm/metaanalysis/')
 get.deduplicated <- function(purpose){
   
   filenames = paste0(paste0('lit_review/raw_files/', purpose, '/'), list.files(paste0('lit_review/raw_files/', purpose)))
+  filenames = filenames[grep('oct22', filenames)]
   pubmed.filenames = filenames[grep('pubmed', filenames)]
   embase.filenames = filenames[grep('embase', filenames)]
   
@@ -34,7 +35,7 @@ get.deduplicated <- function(purpose){
   message(paste('There are', nrow(raw) , 'total titles.'))
   message(paste('There are', nrow(raw) - nrow(raw.unique), 'duplicates removed from PMID and titles.'))
   
-  write.csv(raw.unique, file = paste0('lit_review/unique_entries_', purpose,'.csv'))
+  write.csv(raw.unique, file = paste0('lit_review/unique_entries_', purpose, Sys.Date(), '.csv'))
 }
 
 ## for duration and colonising bacteria metaanalysis 2000 - 2021 
